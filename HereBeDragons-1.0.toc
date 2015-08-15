@@ -1,0 +1,12 @@
+## Interface: 60200
+## Title: Lib: HereBeDragons-1.0
+## Notes: HereBeDragons is a data API for the World of Warcraft mapping system
+## Author: Nevcairiel
+## X-eMail: h.leppkes@gmail.com
+## X-Category: Library
+## X-License: BSD
+## Version: @project-version@
+
+LibStub\LibStub.lua
+
+HereBeDragons-1.0.lua
