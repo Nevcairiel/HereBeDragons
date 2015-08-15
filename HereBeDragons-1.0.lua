@@ -10,12 +10,16 @@ HereBeDragons.eventFrame = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 local PI2 = math.pi * 2
 
+-- GetDungeonMapInfo - flags
+local DUNGEONMAP_MICRO_DUNGEON = 0x00000001
+
 -- gather map info
 local getMapDataTable
 do
     local mapData = {} -- table { width, height, left, top, right, bottom }
     local mapToId, idToMap = {}, {}
     local mapLocalized = {}
+    local microDungeons = {}
 
     -- gather the data of one zone (by mapId)
     local function processZone(id)
@@ -29,14 +33,22 @@ do
         if not mapToId[mapFile] then mapToId[mapFile] = id end
         mapLocalized[id] = GetMapNameByID(id)
 
-        local _, left, top, right, bottom = GetCurrentMapZone()
+        local C = GetCurrentMapContinent()
+        local Z, left, top, right, bottom = GetCurrentMapZone()
         if (left and top and right and bottom and (left ~= 0 or top ~= 0 or right ~= 0 or bottom ~= 0)) then
             mapData[id] = { left - right, top - bottom, left, top, right, bottom }
         else
             mapData[id] = { 0, 0, 0, 0, 0, 0}
         end
 
+        mapData[id].C = C or -100
+        mapData[id].Z = Z or -100
         mapData[id].instance = GetAreaMapInfo(id)
+
+        -- setup microdungeon storage if this zone can have any
+        if mapData[id].C > 0 and mapData[id].Z > 0 and not microDungeons[mapData[id].instance] then
+            microDungeons[mapData[id].instance] = {}
+        end
 
         if numFloors == 0 and GetCurrentMapDungeonLevel() == 1 then
             numFloors = 1
@@ -60,6 +72,18 @@ do
         end
     end
 
+    local function processMicroDungeons()
+        for _, dID in ipairs(GetDungeonMaps()) do
+            local floorIndex, minX, maxX, minY, maxY, terrainMapID, parentWorldMapID, flags = GetDungeonMapInfo(dID)
+
+            -- check if microdungeon, and if this instance can have micro dungeons
+            if bit.band(flags, DUNGEONMAP_MICRO_DUNGEON) == DUNGEONMAP_MICRO_DUNGEON and microDungeons[terrainMapID] then
+                microDungeons[terrainMapID][floorIndex] = { maxX - minX, maxY - minY, maxX, maxY, minX, minY }
+                microDungeons[terrainMapID][floorIndex].instance = terrainMapID
+            end
+        end
+    end
+
     function getMapDataTable(mapId, level)
         if mapId == WORLDMAP_COSMIC_ID then return nil end
         if type(mapId) == "string" then
@@ -72,8 +96,12 @@ do
             level = 1
         end
 
-        if level and level > 0 and data.floors[level] then
-            return data.floors[level]
+        if level and level > 0 then
+            if data.floors[level] then
+                return data.floors[level]
+            elseif microDungeons[data.instance][level] then
+                return microDungeons[data.instance][level]
+            end
         else
             return data
         end
@@ -93,6 +121,8 @@ do
         for idx, zoneId in pairs(areas) do
             processZone(zoneId)
         end
+
+        processMicroDungeons()
     end
 
     gatherMapData()
