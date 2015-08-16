@@ -217,14 +217,12 @@ function HereBeDragons:GetLocalizedMap(mapID)
     if type(mapID) == "string" then
         mapID = mapToID[mapID]
     end
-    assert(mapLocalized[mapID])
     return mapLocalized[mapID]
 end
 
 --- Return the map id to a mapFile
 -- @param mapFile Map File
 function HereBeDragons:GetMapIDFromFile(mapFile)
-    assert(mapToID[mapFile])
     return mapToID[mapFile]
 end
 
@@ -261,7 +259,7 @@ end
 -- @param transform Apply map transforms
 function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level, transform)
     local data = getMapDataTable(zone, level)
-    if not data then return 0, 0 end
+    if not data then return nil, nil, nil end
 
     local width, height, left, top = data[1], data[2], data[3], data[4]
     x, y = left - width * x, top - height * y
@@ -273,16 +271,16 @@ end
 -- @param x Global X position
 -- @param y Global Y position
 -- @param zone MapID or MapFile of the zone
--- @param level Optiona level of the zone
+-- @param level Optional level of the zone
 function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level)
     local data = getMapDataTable(zone, level)
-    if not data then return 0, 0 end
+    if not data then return nil, nil end
 
     local width, height, left, top = data[1], data[2], data[3], data[4]
     x, y = (left - x) / width, (top - y) / height
 
     -- verify the coordinates fall into the zone
-    if x < 0 or x > 1 or y < 0 or y > 1 then return 0, 0 end
+    if x < 0 or x > 1 or y < 0 or y > 1 then return nil, nil end
 
     return x, y
 end
@@ -308,7 +306,7 @@ end
 -- @return distance, deltaX, deltaY in yards
 function HereBeDragons:GetZoneDistance(zone, level, oX, oY, dX, dY)
     local data = getMapDataTable(zone, level)
-    if not data then return 0, 0, 0 end
+    if not data then return nil, nil, nil end
 
     local x = (dX - oX) * data[1]
     local y = (dY - oY) * data[2]
@@ -324,6 +322,7 @@ end
 -- @return angle, distance where angle is in radians and distance in yards
 function HereBeDragons:GetWorldVector(instanceID, oX, oY, dX, dY)
     local distance, deltaX, deltaY = self:GetWorldDistance(instanceID, oX, oY, dX, dY)
+    if not distance then return nil, nil end
 
     -- calculate the angle from deltaY and deltaX
     local angle = math.atan2(deltaX, -deltaY)
