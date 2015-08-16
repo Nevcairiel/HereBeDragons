@@ -242,6 +242,8 @@ function HereBeDragons:GetZoneSize(mapID, level)
     return data[1], data[2]
 end
 
+--- Get a list of all map IDs
+-- @return array-style table with all known/valid map IDs
 function HereBeDragons:GetAllMapIDs()
     local t = {}
     for id in pairs(mapData) do
