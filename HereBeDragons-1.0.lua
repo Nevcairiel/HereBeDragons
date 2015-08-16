@@ -34,7 +34,7 @@ local instanceIdOverrides = {
 local DUNGEONMAP_MICRO_DUNGEON = 0x00000001
 
 -- gather map info
-local mapData = HereBeDragons.mapData -- table { width, height, left, top, right, bottom }
+local mapData = HereBeDragons.mapData -- table { width, height, left, top }
 local mapToId, idToMap = HereBeDragons.mapToId, HereBeDragons.idToMap
 local mapLocalized = HereBeDragons.mapLocalized
 local microDungeons = HereBeDragons.microDungeons
@@ -76,9 +76,9 @@ do
         local C = GetCurrentMapContinent()
         local Z, left, top, right, bottom = GetCurrentMapZone()
         if (left and top and right and bottom and (left ~= 0 or top ~= 0 or right ~= 0 or bottom ~= 0)) then
-            mapData[id] = { left - right, top - bottom, left, top, right, bottom }
+            mapData[id] = { left - right, top - bottom, left, top }
         else
-            mapData[id] = { 0, 0, 0, 0, 0, 0}
+            mapData[id] = { 0, 0, 0, 0 }
         end
 
         mapData[id].C = C or -100
@@ -105,7 +105,7 @@ do
                 SetDungeonMapLevel(f)
                 local _, right, bottom, left, top = GetCurrentMapDungeonLevel()
                 if left and top and right and bottom then
-                    mapData[id].floors[f] = { left - right, top - bottom, left, top, right, bottom }
+                    mapData[id].floors[f] = { left - right, top - bottom, left, top }
                     mapData[id].floors[f].instance = mapData[id].instance
                 end
             end
@@ -118,7 +118,7 @@ do
 
             -- check if microdungeon, and if this instance can have micro dungeons
             if bit.band(flags, DUNGEONMAP_MICRO_DUNGEON) == DUNGEONMAP_MICRO_DUNGEON and microDungeons[terrainMapID] then
-                microDungeons[terrainMapID][floorIndex] = { maxX - minX, maxY - minY, maxX, maxY, minX, minY }
+                microDungeons[terrainMapID][floorIndex] = { maxX - minX, maxY - minY, maxX, maxY }
                 microDungeons[terrainMapID][floorIndex].instance = terrainMapID
             end
         end
