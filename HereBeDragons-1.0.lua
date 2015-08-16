@@ -8,18 +8,24 @@ if not HereBeDragons then return end
 
 HereBeDragons.eventFrame = HereBeDragons.eventFrame or CreateFrame("Frame")
 
+HereBeDragons.mapData       = HereBeDragons.mapData or {}
+HereBeDragons.mapToId       = HereBeDragons.mapToId or {}
+HereBeDragons.idToMap       = HereBeDragons.idToMap or {}
+HereBeDragons.mapLocalized  = HereBeDragons.mapLocalized or {}
+HereBeDragons.microDungeons = HereBeDragons.microDungeons or {}
+HereBeDragons.transforms    = HereBeDragons.transforms or {}
+
 local PI2 = math.pi * 2
 
 -- GetDungeonMapInfo - flags
 local DUNGEONMAP_MICRO_DUNGEON = 0x00000001
 
 -- gather map info
-local getMapDataTable
+local mapData = HereBeDragons.mapData -- table { width, height, left, top, right, bottom }
+local mapToId, idToMap = HereBeDragons.mapToId, HereBeDragons.idToMap
+local mapLocalized = HereBeDragons.mapLocalized
+local microDungeons = HereBeDragons.microDungeons
 do
-    local mapData = {} -- table { width, height, left, top, right, bottom }
-    local mapToId, idToMap = {}, {}
-    local mapLocalized = {}
-    local microDungeons = {}
 
     -- gather the data of one zone (by mapId)
     local function processZone(id)
@@ -84,29 +90,6 @@ do
         end
     end
 
-    function getMapDataTable(mapId, level)
-        if mapId == WORLDMAP_COSMIC_ID then return nil end
-        if type(mapId) == "string" then
-            mapId = mapToId[mapId]
-        end
-        local data = mapData[mapId]
-        if not data then return nil end
-
-        if (level == nil or level == 0) and data.fakefloor then
-            level = 1
-        end
-
-        if level and level > 0 then
-            if data.floors[level] then
-                return data.floors[level]
-            elseif microDungeons[data.instance][level] then
-                return microDungeons[data.instance][level]
-            end
-        else
-            return data
-        end
-    end
-
     local function gatherMapData()
         local continents = {GetMapContinents()}
         for i = 1, #continents, 2 do
@@ -126,9 +109,31 @@ do
     end
 
     gatherMapData()
-    HereBeDragons.gatherMapData = gatherMapData
-    HereBeDragons.getMapDataTable = getMapDataTable
 end
+
+local function getMapDataTable(mapId, level)
+    if mapId == WORLDMAP_COSMIC_ID then return nil end
+    if type(mapId) == "string" then
+        mapId = mapToId[mapId]
+    end
+    local data = mapData[mapId]
+    if not data then return nil end
+
+    if (level == nil or level == 0) and data.fakefloor then
+        level = 1
+    end
+
+    if level and level > 0 then
+        if data.floors[level] then
+            return data.floors[level]
+        elseif microDungeons[data.instance][level] then
+            return microDungeons[data.instance][level]
+        end
+    else
+        return data
+    end
+end
+HereBeDragons.getMapDataTable = getMapDataTable
 
 --- Return the localized zone name for a given mapId or mapFile
 -- @param mapId numeric mapId or mapFile
