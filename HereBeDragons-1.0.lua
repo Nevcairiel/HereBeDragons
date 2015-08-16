@@ -295,6 +295,7 @@ function HereBeDragons:GetWorldDistance(instanceID, oX, oY, dX, dY)
     local deltaX, deltaY = dX - oX, dY - oY
     return (deltaX * deltaX + deltaY * deltaY)^0.5, deltaX, deltaY
 end
+
 --- Return the distance between two points in the same zone
 -- @param zone zone map id or mapfile
 -- @param level optional zone level (floor)
