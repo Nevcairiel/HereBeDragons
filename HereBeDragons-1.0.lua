@@ -17,6 +17,19 @@ HereBeDragons.transforms    = HereBeDragons.transforms or {}
 
 local PI2 = math.pi * 2
 
+-- Override instance ids for phased content
+local instanceIdOverrides = {
+    -- Draenor
+    [1152] = 1116, -- Horde Garrison 1
+    [1153] = 1116, -- Horde Garrison 2
+    [1154] = 1116, -- Horde Garrison 3
+    [1158] = 1116, -- Alliance Garrison 1
+    [1159] = 1116, -- Alliance Garrison 2
+    [1160] = 1116, -- Alliance Garrison 3
+    [1464] = 1116, -- Tanaan
+    [1465] = 1116, -- Tanaan
+}
+
 -- GetDungeonMapInfo - flags
 local DUNGEONMAP_MICRO_DUNGEON = 0x00000001
 
@@ -144,6 +157,9 @@ local function applyMapTransforms(instanceId, x, y)
                 break
             end
         end
+    end
+    if instanceIdOverrides[instanceId] then
+        instanceId = instanceIdOverrides[instanceId]
     end
     return instanceId, x, y
 end
