@@ -140,8 +140,11 @@ do
     end
 
     local function gatherMapData()
+        -- load transforms
         processTransforms()
 
+        -- load the main zones
+        -- these should be processed first so they take precedence in the mapFile lookup table
         local continents = {GetMapContinents()}
         for i = 1, #continents, 2 do
             processZone(continents[i])
@@ -151,17 +154,20 @@ do
             end
         end
 
+        -- process all other zones, this includes dungeons and more
         local areas = GetAreaMaps()
         for idx, zoneId in pairs(areas) do
             processZone(zoneId)
         end
 
+        -- and finally, the microdungeons
         processMicroDungeons()
     end
 
     gatherMapData()
 end
 
+-- Transform a set of coordinates based on the defined map transformations
 local function applyCoordinateTransforms(x, y, instanceId)
     for _, transformData in ipairs(transforms) do
         if transformData.instanceId == instanceId then
@@ -179,6 +185,7 @@ local function applyCoordinateTransforms(x, y, instanceId)
     return x, y, instanceId
 end
 
+-- get the data table for a map and its level (floor)
 local function getMapDataTable(mapId, level)
     if mapId == WORLDMAP_COSMIC_ID then return nil end
     if type(mapId) == "string" then
