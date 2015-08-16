@@ -245,6 +245,14 @@ function HereBeDragons:GetZoneSize(mapId, level)
     return data[1], data[2]
 end
 
+function HereBeDragons:GetAllMapIDs()
+    local t = {}
+    for id in pairs(mapData) do
+        table.insert(t, id)
+    end
+    return t
+end
+
 --- Convert local/point coordinates to world coordinates in yards
 -- @param x X position on 0-1 point coordinates
 -- @param y Y position in 0-1 point coordinates
