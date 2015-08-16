@@ -187,7 +187,7 @@ end
 
 -- get the data table for a map and its level (floor)
 local function getMapDataTable(mapId, level)
-    if mapId == WORLDMAP_COSMIC_ID then return nil end
+    if not mapId or mapId == WORLDMAP_COSMIC_ID then return nil end
     if type(mapId) == "string" then
         mapId = mapToId[mapId]
     end
