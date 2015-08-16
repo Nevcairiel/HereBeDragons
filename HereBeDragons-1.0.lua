@@ -30,9 +30,6 @@ local instanceIdOverrides = {
     [1465] = 1116, -- Tanaan
 }
 
--- GetDungeonMapInfo - flags
-local DUNGEONMAP_MICRO_DUNGEON = 0x00000001
-
 -- gather map info
 local mapData = HereBeDragons.mapData -- table { width, height, left, top }
 local mapToId, idToMap = HereBeDragons.mapToId, HereBeDragons.idToMap
@@ -101,6 +98,10 @@ do
         mapData[id].C = C or -100
         mapData[id].Z = Z or -100
 
+        if mapData[id].C > 0 and mapData[id].Z > 0 and not microDungeons[instanceId] then
+            microDungeons[instanceId] = {}
+        end
+
         if numFloors == 0 and GetCurrentMapDungeonLevel() == 1 then
             numFloors = 1
             mapData[id].fakefloor = true
@@ -127,12 +128,11 @@ do
         for _, dID in ipairs(GetDungeonMaps()) do
             local floorIndex, minX, maxX, minY, maxY, terrainMapID, parentWorldMapID, flags = GetDungeonMapInfo(dID)
 
-            -- check if microdungeon, and if this instance can have micro dungeons
-            if bit.band(flags, DUNGEONMAP_MICRO_DUNGEON) == DUNGEONMAP_MICRO_DUNGEON then
-                terrainMapID, maxX, minX, maxY, minY = applyMapTransforms(terrainMapID, maxX, minX, maxY, minY)
-                if not microDungeons[terrainMapID] then
-                    microDungeons[terrainMapID] = {}
-                end
+            -- apply transform
+            terrainMapID, maxX, minX, maxY, minY = applyMapTransforms(terrainMapID, maxX, minX, maxY, minY)
+
+            -- check if this zone can have microdungeons
+            if microDungeons[terrainMapID] then
                 microDungeons[terrainMapID][floorIndex] = { maxX - minX, maxY - minY, maxX, maxY }
                 microDungeons[terrainMapID][floorIndex].instance = terrainMapID
             end
@@ -201,7 +201,7 @@ local function getMapDataTable(mapId, level)
     if level and level > 0 then
         if data.floors[level] then
             return data.floors[level]
-        elseif microDungeons[data.instance][level] then
+        elseif microDungeons[data.instance] and microDungeons[data.instance][level] then
             return microDungeons[data.instance][level]
         end
     else
