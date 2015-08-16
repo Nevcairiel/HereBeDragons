@@ -25,7 +25,28 @@ local mapData = HereBeDragons.mapData -- table { width, height, left, top, right
 local mapToId, idToMap = HereBeDragons.mapToId, HereBeDragons.idToMap
 local mapLocalized = HereBeDragons.mapLocalized
 local microDungeons = HereBeDragons.microDungeons
+local transforms = HereBeDragons.transforms
 do
+    local function processTransforms()
+        for _, tID in ipairs(GetWorldMapTransforms()) do
+            local terrainMapID, newTerrainMapID, _, _, transformMinY, transformMaxY, transformMinX, transformMaxX, offsetY, offsetX = GetWorldMapTransformInfo(tID)
+            if offsetY ~= 0 or offsetX ~= 0 then
+                if not transforms[terrainMapID] then
+                    transforms[terrainMapID] = {}
+                end
+                local transform = {
+                    newInstanceId = newTerrainMapID,
+                    minY = transformMinY,
+                    maxY = transformMaxY,
+                    minX = transformMinX,
+                    maxX = transformMaxX,
+                    offsetY = offsetY,
+                    offsetX = offsetX
+                }
+                table.insert(transforms[terrainMapID], transform)
+            end
+        end
+    end
 
     -- gather the data of one zone (by mapId)
     local function processZone(id)
@@ -91,6 +112,8 @@ do
     end
 
     local function gatherMapData()
+        processTransforms()
+
         local continents = {GetMapContinents()}
         for i = 1, #continents, 2 do
             processZone(continents[i])
@@ -109,6 +132,20 @@ do
     end
 
     gatherMapData()
+end
+
+local function applyMapTransforms(instanceId, x, y)
+    if transforms[instanceId] then
+        for _, transform in ipairs(transforms[instanceId]) do
+            if transform.minX <= x and transform.maxX >= x and transform.minY <= y and transform.maxY >= y then
+                instanceId = transform.newInstanceId
+                x = x + transform.offsetX
+                y = y + transform.offsetY
+                break
+            end
+        end
+    end
+    return instanceId, x, y
 end
 
 local function getMapDataTable(mapId, level)
@@ -182,7 +219,7 @@ function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level)
     local width, height, left, top = data[1], data[2], data[3], data[4]
     x, y = left - width * x, top - height * y
 
-    return x, y
+    return x, y, data.instance
 end
 
 --- Convert world coordinates to local/point zone coordinates
@@ -212,6 +249,12 @@ end
 -- @param dY destination Y
 -- @return distance, deltaX, deltaY
 function HereBeDragons:GetWorldDistance(oInstance, oX, oY, dInstance, dX, dY)
+    oInstance, oX, oY = applyMapTransforms(oInstance, oX, oY)
+    dInstance, dX, dY = applyMapTransforms(dInstance, dX, dY)
+
+    -- can only compute distance on the same continent
+    if oInstance ~= dInstance then return math.huge, 0, 0 end
+
     local deltaX, deltaY = dX - oX, dY - oY
     return (deltaX * deltaX + deltaY * deltaY)^0.5, deltaX, deltaY
 end
