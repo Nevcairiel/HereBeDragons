@@ -208,7 +208,6 @@ local function getMapDataTable(mapID, level)
         return data
     end
 end
-HereBeDragons.getMapDataTable = getMapDataTable
 
 --- Return the localized zone name for a given mapID or mapFile
 -- @param mapID numeric mapID or mapFile
