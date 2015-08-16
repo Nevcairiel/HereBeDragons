@@ -44,10 +44,8 @@ do
         for _, tID in ipairs(GetWorldMapTransforms()) do
             local terrainMapID, newTerrainMapID, _, _, transformMinY, transformMaxY, transformMinX, transformMaxX, offsetY, offsetX = GetWorldMapTransformInfo(tID)
             if offsetY ~= 0 or offsetX ~= 0 then
-                if not transforms[terrainMapID] then
-                    transforms[terrainMapID] = {}
-                end
                 local transform = {
+                    instanceId = terrainMapID,
                     newInstanceId = newTerrainMapID,
                     minY = transformMinY,
                     maxY = transformMaxY,
@@ -56,9 +54,25 @@ do
                     offsetY = offsetY,
                     offsetX = offsetX
                 }
-                table.insert(transforms[terrainMapID], transform)
+                table.insert(transforms, transform)
             end
         end
+    end
+
+    local function applyMapTransforms(instanceId, left, right, top, bottom)
+        for _, transformData in ipairs(transforms) do
+            if transformData.instanceId == instanceId then
+                if transformData.minX <= left and transformData.maxX >= right and transformData.minY <= top and transformData.maxY >= bottom then
+                    instanceId = transformData.newInstanceId
+                    left   = left   + transformData.offsetX
+                    right  = right  + transformData.offsetX
+                    top    = top    + transformData.offsetY
+                    bottom = bottom + transformData.offsetY
+                    break
+                end
+            end
+        end
+        return instanceId, left, right, top, bottom
     end
 
     -- gather the data of one zone (by mapId)
@@ -73,17 +87,19 @@ do
         if not mapToId[mapFile] then mapToId[mapFile] = id end
         mapLocalized[id] = GetMapNameByID(id)
 
+        local instanceId = GetAreaMapInfo(id)
         local C = GetCurrentMapContinent()
         local Z, left, top, right, bottom = GetCurrentMapZone()
         if (left and top and right and bottom and (left ~= 0 or top ~= 0 or right ~= 0 or bottom ~= 0)) then
+            instanceId, left, right, top, bottom = applyMapTransforms(instanceId, left, right, top, bottom)
             mapData[id] = { left - right, top - bottom, left, top }
         else
             mapData[id] = { 0, 0, 0, 0 }
         end
 
+        mapData[id].instance = instanceId
         mapData[id].C = C or -100
         mapData[id].Z = Z or -100
-        mapData[id].instance = GetAreaMapInfo(id)
 
         -- setup microdungeon storage if this zone can have any
         if mapData[id].C > 0 and mapData[id].Z > 0 and not microDungeons[mapData[id].instance] then
@@ -118,6 +134,7 @@ do
 
             -- check if microdungeon, and if this instance can have micro dungeons
             if bit.band(flags, DUNGEONMAP_MICRO_DUNGEON) == DUNGEONMAP_MICRO_DUNGEON and microDungeons[terrainMapID] then
+                terrainMapID, maxX, minX, maxY, minY = applyMapTransforms(terrainMapID, maxX, minX, maxY, minY)
                 microDungeons[terrainMapID][floorIndex] = { maxX - minX, maxY - minY, maxX, maxY }
                 microDungeons[terrainMapID][floorIndex].instance = terrainMapID
             end
@@ -147,13 +164,13 @@ do
     gatherMapData()
 end
 
-local function applyMapTransforms(instanceId, x, y)
-    if transforms[instanceId] then
-        for _, transform in ipairs(transforms[instanceId]) do
-            if transform.minX <= x and transform.maxX >= x and transform.minY <= y and transform.maxY >= y then
-                instanceId = transform.newInstanceId
-                x = x + transform.offsetX
-                y = y + transform.offsetY
+local function applyCoordinateTransforms(x, y, instanceId)
+    for _, transformData in ipairs(transforms) do
+        if transformData.instanceId == instanceId then
+            if transformData.minX <= x and transformData.maxX >= x and transformData.minY <= y and transformData.maxY >= y then
+                instanceId = transformData.newInstanceId
+                x = x + transformData.offsetX
+                y = y + transformData.offsetY
                 break
             end
         end
@@ -161,7 +178,7 @@ local function applyMapTransforms(instanceId, x, y)
     if instanceIdOverrides[instanceId] then
         instanceId = instanceIdOverrides[instanceId]
     end
-    return instanceId, x, y
+    return x, y, instanceId
 end
 
 local function getMapDataTable(mapId, level)
@@ -228,7 +245,8 @@ end
 -- @param y Y position in 0-1 point coordinates
 -- @param zone MapId or MapFile of the zone
 -- @param level Optional level of the zone
-function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level)
+-- @param transform Apply map transforms
+function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level, transform)
     local data = getMapDataTable(zone, level)
     if not data then return 0, 0 end
 
@@ -257,34 +275,26 @@ function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level)
 end
 
 --- Return the distance from an origin position to a destination position in the same instance/continent.
--- @param oInstance origin instance id
+-- @param instanceId instance id
 -- @param oX origin X
 -- @param oY origin Y
--- @param dInstance destination instance id
 -- @param dX destination X
 -- @param dY destination Y
 -- @return distance, deltaX, deltaY
-function HereBeDragons:GetWorldDistance(oInstance, oX, oY, dInstance, dX, dY)
-    oInstance, oX, oY = applyMapTransforms(oInstance, oX, oY)
-    dInstance, dX, dY = applyMapTransforms(dInstance, dX, dY)
-
-    -- can only compute distance on the same continent
-    if oInstance ~= dInstance then return math.huge, 0, 0 end
-
+function HereBeDragons:GetWorldDistance(instanceId, oX, oY, dX, dY)
     local deltaX, deltaY = dX - oX, dY - oY
     return (deltaX * deltaX + deltaY * deltaY)^0.5, deltaX, deltaY
 end
 
 --- Return the angle and distance from an origin position to a destination position in the same instance/continent.
--- @param oInstance origin instance id
+-- @param instanceId instance id
 -- @param oX origin X
 -- @param oY origin Y
--- @param dInstance destination instance id
 -- @param dX destination X
 -- @param dY destination Y
 -- @return angle, distance where angle is in radians and distance in yards
-function HereBeDragons:GetWorldVector(oInstance, oX, oY, dInstance, dX, dY)
-    local distance, deltaX, deltaY = self:GetWorldDistance(oInstance, oX, oY, dInstance, dX, dY)
+function HereBeDragons:GetWorldVector(instanceId, oX, oY, dX, dY)
+    local distance, deltaX, deltaY = self:GetWorldDistance(instanceId, oX, oY, dX, dY)
 
     -- calculate the angle from deltaY and deltaX
     local angle = math.atan2(deltaX, -deltaY)
@@ -297,4 +307,15 @@ function HereBeDragons:GetWorldVector(oInstance, oX, oY, dInstance, dX, dY)
     end
 
     return angle, distance
+end
+
+--- Get the current world position of the player
+-- The position is transformed to the current continent, if applicable
+-- @return x, y, instanceId
+function HereBeDragons:GetPlayerWorldPosition()
+    -- get the current position
+    local y, x, z, instanceId = UnitPosition("player")
+
+    -- return transformed coordinates
+    return applyCoordinateTransforms(x, y, instanceId)
 end
