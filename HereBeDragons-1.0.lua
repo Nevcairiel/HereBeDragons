@@ -9,7 +9,7 @@ if not HereBeDragons then return end
 HereBeDragons.eventFrame = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData       = HereBeDragons.mapData or {}
-HereBeDragons.mapToId       = HereBeDragons.mapToId or {}
+HereBeDragons.mapToID       = HereBeDragons.mapToID or {}
 HereBeDragons.idToMap       = HereBeDragons.idToMap or {}
 HereBeDragons.mapLocalized  = HereBeDragons.mapLocalized or {}
 HereBeDragons.microDungeons = HereBeDragons.microDungeons or {}
@@ -18,7 +18,7 @@ HereBeDragons.transforms    = HereBeDragons.transforms or {}
 local PI2 = math.pi * 2
 
 -- Override instance ids for phased content
-local instanceIdOverrides = {
+local instanceIDOverrides = {
     -- Draenor
     [1152] = 1116, -- Horde Garrison 1
     [1153] = 1116, -- Horde Garrison 2
@@ -32,7 +32,7 @@ local instanceIdOverrides = {
 
 -- gather map info
 local mapData = HereBeDragons.mapData -- table { width, height, left, top }
-local mapToId, idToMap = HereBeDragons.mapToId, HereBeDragons.idToMap
+local mapToID, idToMap = HereBeDragons.mapToID, HereBeDragons.idToMap
 local mapLocalized = HereBeDragons.mapLocalized
 local microDungeons = HereBeDragons.microDungeons
 local transforms = HereBeDragons.transforms
@@ -42,8 +42,8 @@ do
             local terrainMapID, newTerrainMapID, _, _, transformMinY, transformMaxY, transformMinX, transformMaxX, offsetY, offsetX = GetWorldMapTransformInfo(tID)
             if offsetY ~= 0 or offsetX ~= 0 then
                 local transform = {
-                    instanceId = terrainMapID,
-                    newInstanceId = newTerrainMapID,
+                    instanceID = terrainMapID,
+                    newInstanceID = newTerrainMapID,
                     minY = transformMinY,
                     maxY = transformMaxY,
                     minX = transformMinX,
@@ -56,11 +56,11 @@ do
         end
     end
 
-    local function applyMapTransforms(instanceId, left, right, top, bottom)
+    local function applyMapTransforms(instanceID, left, right, top, bottom)
         for _, transformData in ipairs(transforms) do
-            if transformData.instanceId == instanceId then
+            if transformData.instanceID == instanceID then
                 if transformData.minX <= left and transformData.maxX >= right and transformData.minY <= top and transformData.maxY >= bottom then
-                    instanceId = transformData.newInstanceId
+                    instanceID = transformData.newInstanceID
                     left   = left   + transformData.offsetX
                     right  = right  + transformData.offsetX
                     top    = top    + transformData.offsetY
@@ -69,10 +69,10 @@ do
                 end
             end
         end
-        return instanceId, left, right, top, bottom
+        return instanceID, left, right, top, bottom
     end
 
-    -- gather the data of one zone (by mapId)
+    -- gather the data of one zone (by mapID)
     local function processZone(id)
         if not id or mapData[id] then return end
 
@@ -81,25 +81,25 @@ do
         local numFloors = GetNumDungeonMapLevels()
         idToMap[id] = mapFile
 
-        if not mapToId[mapFile] then mapToId[mapFile] = id end
+        if not mapToID[mapFile] then mapToID[mapFile] = id end
         mapLocalized[id] = GetMapNameByID(id)
 
-        local instanceId = GetAreaMapInfo(id)
+        local instanceID = GetAreaMapInfo(id)
         local C = GetCurrentMapContinent()
         local Z, left, top, right, bottom = GetCurrentMapZone()
         if (left and top and right and bottom and (left ~= 0 or top ~= 0 or right ~= 0 or bottom ~= 0)) then
-            instanceId, left, right, top, bottom = applyMapTransforms(instanceId, left, right, top, bottom)
+            instanceID, left, right, top, bottom = applyMapTransforms(instanceID, left, right, top, bottom)
             mapData[id] = { left - right, top - bottom, left, top }
         else
             mapData[id] = { 0, 0, 0, 0 }
         end
 
-        mapData[id].instance = instanceId
+        mapData[id].instance = instanceID
         mapData[id].C = C or -100
         mapData[id].Z = Z or -100
 
-        if mapData[id].C > 0 and mapData[id].Z > 0 and not microDungeons[instanceId] then
-            microDungeons[instanceId] = {}
+        if mapData[id].C > 0 and mapData[id].Z > 0 and not microDungeons[instanceID] then
+            microDungeons[instanceID] = {}
         end
 
         if numFloors == 0 and GetCurrentMapDungeonLevel() == 1 then
@@ -156,8 +156,8 @@ do
 
         -- process all other zones, this includes dungeons and more
         local areas = GetAreaMaps()
-        for idx, zoneId in pairs(areas) do
-            processZone(zoneId)
+        for idx, zoneID in pairs(areas) do
+            processZone(zoneID)
         end
 
         -- and finally, the microdungeons
@@ -168,30 +168,30 @@ do
 end
 
 -- Transform a set of coordinates based on the defined map transformations
-local function applyCoordinateTransforms(x, y, instanceId)
+local function applyCoordinateTransforms(x, y, instanceID)
     for _, transformData in ipairs(transforms) do
-        if transformData.instanceId == instanceId then
+        if transformData.instanceID == instanceID then
             if transformData.minX <= x and transformData.maxX >= x and transformData.minY <= y and transformData.maxY >= y then
-                instanceId = transformData.newInstanceId
+                instanceID = transformData.newInstanceID
                 x = x + transformData.offsetX
                 y = y + transformData.offsetY
                 break
             end
         end
     end
-    if instanceIdOverrides[instanceId] then
-        instanceId = instanceIdOverrides[instanceId]
+    if instanceIDOverrides[instanceID] then
+        instanceID = instanceIDOverrides[instanceID]
     end
-    return x, y, instanceId
+    return x, y, instanceID
 end
 
 -- get the data table for a map and its level (floor)
-local function getMapDataTable(mapId, level)
-    if not mapId or mapId == WORLDMAP_COSMIC_ID then return nil end
-    if type(mapId) == "string" then
-        mapId = mapToId[mapId]
+local function getMapDataTable(mapID, level)
+    if not mapID or mapID == WORLDMAP_COSMIC_ID then return nil end
+    if type(mapID) == "string" then
+        mapID = mapToID[mapID]
     end
-    local data = mapData[mapId]
+    local data = mapData[mapID]
     if not data then return nil end
 
     if (level == nil or level == 0) and data.fakefloor then
@@ -210,36 +210,36 @@ local function getMapDataTable(mapId, level)
 end
 HereBeDragons.getMapDataTable = getMapDataTable
 
---- Return the localized zone name for a given mapId or mapFile
--- @param mapId numeric mapId or mapFile
-function HereBeDragons:GetLocalizedMap(mapId)
-    if mapId == WORLDMAP_COSMIC_ID then return WORLD_MAP end
-    if type(mapId) == "string" then
-        mapId = mapToId[mapId]
+--- Return the localized zone name for a given mapID or mapFile
+-- @param mapID numeric mapID or mapFile
+function HereBeDragons:GetLocalizedMap(mapID)
+    if mapID == WORLDMAP_COSMIC_ID then return WORLD_MAP end
+    if type(mapID) == "string" then
+        mapID = mapToID[mapID]
     end
-    assert(mapLocalized[mapId])
-    return mapLocalized[mapId]
+    assert(mapLocalized[mapID])
+    return mapLocalized[mapID]
 end
 
 --- Return the map id to a mapFile
 -- @param mapFile Map File
-function HereBeDragons:GetMapIdFromFile(mapFile)
-    assert(mapToId[mapFile])
-    return mapToId[mapFile]
+function HereBeDragons:GetMapIDFromFile(mapFile)
+    assert(mapToID[mapFile])
+    return mapToID[mapFile]
 end
 
---- Return the mapFile to a map id
--- @param mapId Map Id
-function HereBeDragons:GetMapFileFromId(mapId)
-    return idToMap[mapId]
+--- Return the mapFile to a map ID
+-- @param mapID Map ID
+function HereBeDragons:GetMapFileFromID(mapID)
+    return idToMap[mapID]
 end
 
 --- Get the size of the zone
--- @param mapId Map Id or MapFile of the zone
+-- @param mapID Map ID or MapFile of the zone
 -- @param level Optional map level
 -- @return width, height of the zone, in yards
-function HereBeDragons:GetZoneSize(mapId, level)
-    local data = getMapDataTable(mapId, level)
+function HereBeDragons:GetZoneSize(mapID, level)
+    local data = getMapDataTable(mapID, level)
     if not data then return 0, 0 end
 
     return data[1], data[2]
@@ -256,7 +256,7 @@ end
 --- Convert local/point coordinates to world coordinates in yards
 -- @param x X position on 0-1 point coordinates
 -- @param y Y position in 0-1 point coordinates
--- @param zone MapId or MapFile of the zone
+-- @param zone MapID or MapFile of the zone
 -- @param level Optional level of the zone
 -- @param transform Apply map transforms
 function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level, transform)
@@ -272,7 +272,7 @@ end
 --- Convert world coordinates to local/point zone coordinates
 -- @param x Global X position
 -- @param y Global Y position
--- @param zone MapId or MapFile of the zone
+-- @param zone MapID or MapFile of the zone
 -- @param level Optiona level of the zone
 function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level)
     local data = getMapDataTable(zone, level)
@@ -288,13 +288,13 @@ function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level)
 end
 
 --- Return the distance from an origin position to a destination position in the same instance/continent.
--- @param instanceId instance id
+-- @param instanceID instance ID
 -- @param oX origin X
 -- @param oY origin Y
 -- @param dX destination X
 -- @param dY destination Y
 -- @return distance, deltaX, deltaY
-function HereBeDragons:GetWorldDistance(instanceId, oX, oY, dX, dY)
+function HereBeDragons:GetWorldDistance(instanceID, oX, oY, dX, dY)
     local deltaX, deltaY = dX - oX, dY - oY
     return (deltaX * deltaX + deltaY * deltaY)^0.5, deltaX, deltaY
 end
@@ -316,14 +316,14 @@ function HereBeDragons:GetZoneDistance(zone, level, oX, oY, dX, dY)
 end
 
 --- Return the angle and distance from an origin position to a destination position in the same instance/continent.
--- @param instanceId instance id
+-- @param instanceID instance ID
 -- @param oX origin X
 -- @param oY origin Y
 -- @param dX destination X
 -- @param dY destination Y
 -- @return angle, distance where angle is in radians and distance in yards
-function HereBeDragons:GetWorldVector(instanceId, oX, oY, dX, dY)
-    local distance, deltaX, deltaY = self:GetWorldDistance(instanceId, oX, oY, dX, dY)
+function HereBeDragons:GetWorldVector(instanceID, oX, oY, dX, dY)
+    local distance, deltaX, deltaY = self:GetWorldDistance(instanceID, oX, oY, dX, dY)
 
     -- calculate the angle from deltaY and deltaX
     local angle = math.atan2(deltaX, -deltaY)
@@ -340,11 +340,11 @@ end
 
 --- Get the current world position of the player
 -- The position is transformed to the current continent, if applicable
--- @return x, y, instanceId
+-- @return x, y, instanceID
 function HereBeDragons:GetPlayerWorldPosition()
     -- get the current position
-    local y, x, z, instanceId = UnitPosition("player")
+    local y, x, z, instanceID = UnitPosition("player")
 
     -- return transformed coordinates
-    return applyCoordinateTransforms(x, y, instanceId)
+    return applyCoordinateTransforms(x, y, instanceID)
 end
