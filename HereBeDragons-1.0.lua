@@ -101,11 +101,6 @@ do
         mapData[id].C = C or -100
         mapData[id].Z = Z or -100
 
-        -- setup microdungeon storage if this zone can have any
-        if mapData[id].C > 0 and mapData[id].Z > 0 and not microDungeons[mapData[id].instance] then
-            microDungeons[mapData[id].instance] = {}
-        end
-
         if numFloors == 0 and GetCurrentMapDungeonLevel() == 1 then
             numFloors = 1
             mapData[id].fakefloor = true
@@ -133,8 +128,11 @@ do
             local floorIndex, minX, maxX, minY, maxY, terrainMapID, parentWorldMapID, flags = GetDungeonMapInfo(dID)
 
             -- check if microdungeon, and if this instance can have micro dungeons
-            if bit.band(flags, DUNGEONMAP_MICRO_DUNGEON) == DUNGEONMAP_MICRO_DUNGEON and microDungeons[terrainMapID] then
+            if bit.band(flags, DUNGEONMAP_MICRO_DUNGEON) == DUNGEONMAP_MICRO_DUNGEON then
                 terrainMapID, maxX, minX, maxY, minY = applyMapTransforms(terrainMapID, maxX, minX, maxY, minY)
+                if not microDungeons[terrainMapID] then
+                    microDungeons[terrainMapID] = {}
+                end
                 microDungeons[terrainMapID][floorIndex] = { maxX - minX, maxY - minY, maxX, maxY }
                 microDungeons[terrainMapID][floorIndex].instance = terrainMapID
             end
