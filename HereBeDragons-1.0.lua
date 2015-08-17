@@ -10,8 +10,6 @@ HereBeDragons.eventFrame = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData       = HereBeDragons.mapData or {}
 HereBeDragons.mapToID       = HereBeDragons.mapToID or {}
-HereBeDragons.idToMap       = HereBeDragons.idToMap or {}
-HereBeDragons.mapLocalized  = HereBeDragons.mapLocalized or {}
 HereBeDragons.microDungeons = HereBeDragons.microDungeons or {}
 HereBeDragons.transforms    = HereBeDragons.transforms or {}
 
@@ -32,8 +30,7 @@ local instanceIDOverrides = {
 
 -- gather map info
 local mapData = HereBeDragons.mapData -- table { width, height, left, top }
-local mapToID, idToMap = HereBeDragons.mapToID, HereBeDragons.idToMap
-local mapLocalized = HereBeDragons.mapLocalized
+local mapToID = HereBeDragons.mapToID
 local microDungeons = HereBeDragons.microDungeons
 local transforms = HereBeDragons.transforms
 do
@@ -76,17 +73,8 @@ do
     local function processZone(id)
         if not id or mapData[id] then return end
 
-        SetMapByID(id)
-        local mapFile = GetMapInfo()
-        local numFloors = GetNumDungeonMapLevels()
-        idToMap[id] = mapFile
-
-        if not mapToID[mapFile] then mapToID[mapFile] = id end
-        mapLocalized[id] = GetMapNameByID(id)
-
-        local instanceID = GetAreaMapInfo(id)
-        local C = GetCurrentMapContinent()
-        local Z, left, top, right, bottom = GetCurrentMapZone()
+        -- dimensions of the map
+        local instanceID, _, _, left, right, top, bottom = GetAreaMapInfo(id)
         if (left and top and right and bottom and (left ~= 0 or top ~= 0 or right ~= 0 or bottom ~= 0)) then
             instanceID, left, right, top, bottom = applyMapTransforms(instanceID, left, right, top, bottom)
             mapData[id] = { left - right, top - bottom, left, top }
@@ -95,6 +83,16 @@ do
         end
 
         mapData[id].instance = instanceID
+        mapData[id].name = GetMapNameByID(id)
+
+        -- set the map and get all info which needs an active map
+        SetMapByID(id)
+
+        local mapFile = GetMapInfo()
+        if not mapToID[mapFile] then mapToID[mapFile] = id end
+        mapData[id].mapFile = mapFile
+
+        local C, Z = GetCurrentMapContinent(), GetCurrentMapZone()
         mapData[id].C = C or -100
         mapData[id].Z = Z or -100
 
@@ -102,6 +100,7 @@ do
             microDungeons[instanceID] = {}
         end
 
+        local numFloors = GetNumDungeonMapLevels()
         if numFloors == 0 and GetCurrentMapDungeonLevel() == 1 then
             numFloors = 1
             mapData[id].fakefloor = true
@@ -216,7 +215,7 @@ function HereBeDragons:GetLocalizedMap(mapID)
     if type(mapID) == "string" then
         mapID = mapToID[mapID]
     end
-    return mapLocalized[mapID]
+    return mapData[mapID] and mapData[mapID].name or nil
 end
 
 --- Return the map id to a mapFile
@@ -228,7 +227,7 @@ end
 --- Return the mapFile to a map ID
 -- @param mapID Map ID
 function HereBeDragons:GetMapFileFromID(mapID)
-    return idToMap[mapID]
+    return mapData[mapID] and mapData[mapID].mapFile or nil
 end
 
 --- Get the size of the zone
