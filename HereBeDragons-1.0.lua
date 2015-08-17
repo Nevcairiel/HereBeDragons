@@ -138,6 +138,30 @@ do
         end
     end
 
+    local function fixupZones()
+        -- alliance draenor garrison
+        if mapData[971] then
+            mapData[971].Z = 5
+            mapData[971].mapFile = "garrisonsmvalliance"
+            -- alternate zone ids
+            mapData[973] = mapData[971]
+            mapData[974] = mapData[971]
+            mapData[975] = mapData[971]
+            mapData[991] = mapData[971]
+        end
+
+        -- horde draenor garrison
+        if mapData[976] then
+            mapData[976].Z = 3
+            mapData[976].mapFile = "garrisonffhorde"
+            -- alternate zone ids
+            mapData[980] = mapData[976]
+            mapData[981] = mapData[976]
+            mapData[982] = mapData[976]
+            mapData[990] = mapData[976]
+        end
+    end
+
     local function gatherMapData()
         -- load transforms
         processTransforms()
@@ -158,6 +182,9 @@ do
         for idx, zoneID in pairs(areas) do
             processZone(zoneID)
         end
+
+        -- fix a few zones with data lookup problems
+        fixupZones()
 
         -- and finally, the microdungeons
         processMicroDungeons()
