@@ -34,6 +34,26 @@ local mapToID = HereBeDragons.mapToID
 local microDungeons = HereBeDragons.microDungeons
 local transforms = HereBeDragons.transforms
 do
+    local MAPS_TO_REMAP = {
+         -- alliance garrison
+        [973] = 971,
+        [974] = 971,
+        [975] = 971,
+        [991] = 971,
+        -- horde garrison
+        [980] = 976,
+        [981] = 976,
+        [982] = 976,
+        [990] = 976,
+    }
+
+    -- some zones will remap initially, but have a fixup later
+    local REMAP_FIXUP_EXEMPT = {
+        -- main draenor garrison maps
+        [971] = true,
+        [976] = true,
+    }
+
     local function processTransforms()
         for _, tID in ipairs(GetWorldMapTransforms()) do
             local terrainMapID, newTerrainMapID, _, _, transformMinY, transformMaxY, transformMinX, transformMaxX, offsetY, offsetX = GetWorldMapTransformInfo(tID)
@@ -73,6 +93,18 @@ do
     local function processZone(id)
         if not id or mapData[id] then return end
 
+        -- set the map and verify it could be set
+        local success = SetMapByID(id)
+        if not success then
+            return
+        elseif id ~= GetCurrentMapAreaID() and not REMAP_FIXUP_EXEMPT[id] then
+            -- this is an alias zone (phasing terrain changes), just skip it and remap it later
+            if not MAPS_TO_REMAP[id] then
+                MAPS_TO_REMAP[id] = GetCurrentMapAreaID()
+            end
+            return
+        end
+
         -- dimensions of the map
         local instanceID, _, _, left, right, top, bottom = GetAreaMapInfo(id)
         if (left and top and right and bottom and (left ~= 0 or top ~= 0 or right ~= 0 or bottom ~= 0)) then
@@ -85,12 +117,14 @@ do
         mapData[id].instance = instanceID
         mapData[id].name = GetMapNameByID(id)
 
-        -- set the map and get all info which needs an active map
-        SetMapByID(id)
-
         local mapFile = GetMapInfo()
-        if not mapToID[mapFile] then mapToID[mapFile] = id end
-        mapData[id].mapFile = mapFile
+        if mapFile then
+            -- remove phased terrain from the map names
+            mapFile = mapFile:gsub("_terrain%d+$", "")
+
+            if not mapToID[mapFile] then mapToID[mapFile] = id end
+            mapData[id].mapFile = mapFile
+        end
 
         local C, Z = GetCurrentMapContinent(), GetCurrentMapZone()
         mapData[id].C = C or -100
@@ -143,22 +177,19 @@ do
         if mapData[971] then
             mapData[971].Z = 5
             mapData[971].mapFile = "garrisonsmvalliance"
-            -- alternate zone ids
-            mapData[973] = mapData[971]
-            mapData[974] = mapData[971]
-            mapData[975] = mapData[971]
-            mapData[991] = mapData[971]
         end
 
         -- horde draenor garrison
         if mapData[976] then
             mapData[976].Z = 3
             mapData[976].mapFile = "garrisonffhorde"
-            -- alternate zone ids
-            mapData[980] = mapData[976]
-            mapData[981] = mapData[976]
-            mapData[982] = mapData[976]
-            mapData[990] = mapData[976]
+        end
+
+        -- remap zones with alias IDs
+        for remapID, validMapID in pairs(MAPS_TO_REMAP) do
+            if mapData[validMapID] then
+                mapData[remapID] = mapData[validMapID]
+            end
         end
     end
 
@@ -215,6 +246,7 @@ end
 local function getMapDataTable(mapID, level)
     if not mapID or mapID == WORLDMAP_COSMIC_ID then return nil end
     if type(mapID) == "string" then
+        mapID = mapID:gsub("_terrain%d+$", "")
         mapID = mapToID[mapID]
     end
     local data = mapData[mapID]
@@ -240,6 +272,7 @@ end
 function HereBeDragons:GetLocalizedMap(mapID)
     if mapID == WORLDMAP_COSMIC_ID then return WORLD_MAP end
     if type(mapID) == "string" then
+        mapID = mapID:gsub("_terrain%d+$", "")
         mapID = mapToID[mapID]
     end
     return mapData[mapID] and mapData[mapID].name or nil
@@ -248,7 +281,11 @@ end
 --- Return the map id to a mapFile
 -- @param mapFile Map File
 function HereBeDragons:GetMapIDFromFile(mapFile)
-    return mapToID[mapFile]
+    if mapFile then
+        mapFile = mapFile:gsub("_terrain%d+$", "")
+        return mapToID[mapFile]
+    end
+    return nil
 end
 
 --- Return the mapFile to a map ID
