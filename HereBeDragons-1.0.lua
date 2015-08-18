@@ -28,11 +28,11 @@ local type = type
 local UnitPosition = UnitPosition
 
 -- data table upvalues
-local mapData = HereBeDragons.mapData -- table { width, height, left, top }
-local continents = HereBeDragons.continents
-local mapToID = HereBeDragons.mapToID
+local mapData       = HereBeDragons.mapData -- table { width, height, left, top }
+local continents    = HereBeDragons.continents
+local mapToID       = HereBeDragons.mapToID
 local microDungeons = HereBeDragons.microDungeons
-local transforms = HereBeDragons.transforms
+local transforms    = HereBeDragons.transforms
 
 local currentPlayerZoneMapID, currentPlayerLevel
 
