@@ -10,13 +10,13 @@ local CBH = LibStub("CallbackHandler-1.0")
 
 HereBeDragons.eventFrame    = HereBeDragons.eventFrame or CreateFrame("Frame")
 
-HereBeDragons.mapData       = HereBeDragons.mapData or {}
-HereBeDragons.continents    = HereBeDragons.continents or {}
-HereBeDragons.mapToID       = HereBeDragons.mapToID or {}
-HereBeDragons.microDungeons = HereBeDragons.microDungeons or {}
-HereBeDragons.transforms    = HereBeDragons.transforms or {}
+HereBeDragons.mapData          = HereBeDragons.mapData or {}
+HereBeDragons.continentZoneMap = HereBeDragons.continentZoneMap or {}
+HereBeDragons.mapToID          = HereBeDragons.mapToID or {}
+HereBeDragons.microDungeons    = HereBeDragons.microDungeons or {}
+HereBeDragons.transforms       = HereBeDragons.transforms or {}
 
-HereBeDragons.callbacks     = CBH:New(HereBeDragons, nil, nil, false)
+HereBeDragons.callbacks        = CBH:New(HereBeDragons, nil, nil, false)
 
 -- Lua upvalues
 local PI2 = math.pi * 2
@@ -28,11 +28,11 @@ local type = type
 local UnitPosition = UnitPosition
 
 -- data table upvalues
-local mapData       = HereBeDragons.mapData -- table { width, height, left, top }
-local continents    = HereBeDragons.continents
-local mapToID       = HereBeDragons.mapToID
-local microDungeons = HereBeDragons.microDungeons
-local transforms    = HereBeDragons.transforms
+local mapData          = HereBeDragons.mapData -- table { width, height, left, top }
+local continentZoneMap = HereBeDragons.continentZoneMap
+local mapToID          = HereBeDragons.mapToID
+local microDungeons    = HereBeDragons.microDungeons
+local transforms       = HereBeDragons.transforms
 
 local currentPlayerZoneMapID, currentPlayerLevel
 
@@ -172,11 +172,11 @@ if not oldversion then
             end
 
             -- store C/Z lookup table
-            if not continents[C] then
-                continents[C] = {}
+            if not continentZoneMap[C] then
+                continentZoneMap[C] = {}
             end
-            if not continents[C][Z] then
-                continents[C][Z] = id
+            if not continentZoneMap[C][Z] then
+                continentZoneMap[C][Z] = id
             end
         end
 
@@ -396,8 +396,8 @@ end
 -- @param C continent index from GetCurrentMapContinent
 -- @param Z zone index from GetCurrentMapZone
 function HereBeDragons:GetMapIDFromCZ(C, Z)
-    if continents[C] then
-        return continents[C][Z]
+    if continentZoneMap[C] then
+        return continentZoneMap[C][Z]
     end
     return nil
 end
