@@ -325,10 +325,10 @@ local function UpdateCurrentPosition()
     SetMapToCurrentZone()
 
     -- retrieve active values
-    currentPlayerZoneMapID, currentPlayerLevel = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+    local newMapID, newLevel = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
 
     -- restore previous map
-    if prevMapID and prevMapID ~= currentPlayerZoneMapID then
+    if prevMapID and prevMapID ~= newMapID then
         SetMapByID(prevMapID)
     end
     -- and level
@@ -337,6 +337,11 @@ local function UpdateCurrentPosition()
     end
 
     RestoreWMU()
+
+    if newMapID ~= currentPlayerZoneMapID or newLevel ~= currentPlayerLevel then
+        currentPlayerZoneMapID, currentPlayerLevel = newMapID, newLevel
+        -- XXX: notification callback? could be useful to addons to let them know the active zone changed
+    end
 end
 
 local function OnEvent(frame, event, ...)
