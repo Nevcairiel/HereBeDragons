@@ -320,8 +320,7 @@ end
 -- @param y Y position in 0-1 point coordinates
 -- @param zone MapID or MapFile of the zone
 -- @param level Optional level of the zone
--- @param transform Apply map transforms
-function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level, transform)
+function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level)
     local data = getMapDataTable(zone, level)
     if not data then return nil, nil, nil end
 
