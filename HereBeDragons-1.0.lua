@@ -6,7 +6,7 @@ assert(LibStub, MAJOR .. " requires LibStub")
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
 if not HereBeDragons then return end
 
-HereBeDragons.eventFrame = HereBeDragons.eventFrame or CreateFrame("Frame")
+HereBeDragons.eventFrame    = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData       = HereBeDragons.mapData or {}
 HereBeDragons.continents    = HereBeDragons.continents or {}
@@ -29,6 +29,8 @@ local continents = HereBeDragons.continents
 local mapToID = HereBeDragons.mapToID
 local microDungeons = HereBeDragons.microDungeons
 local transforms = HereBeDragons.transforms
+
+local currentPlayerZoneMapID, currentPlayerLevel
 
 -- Override instance ids for phased content
 local instanceIDOverrides = {
@@ -311,6 +313,47 @@ local function getMapDataTable(mapID, level)
     else
         return data
     end
+end
+
+local function UpdateCurrentPosition()
+    UnregisterWMU()
+
+    -- save active map and level
+    local prevMapID, prevLevel = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+
+    -- set current map
+    SetMapToCurrentZone()
+
+    -- retrieve active values
+    currentPlayerZoneMapID, currentPlayerLevel = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+
+    -- restore previous map
+    if prevMapID and prevMapID ~= currentPlayerZoneMapID then
+        SetMapByID(prevMapID)
+    end
+    -- and level
+    if prevLevel and prevLevel > 0 then
+        SetDungeonMapLevel(prevLevel)
+    end
+
+    RestoreWMU()
+end
+
+local function OnEvent(frame, event, ...)
+    UpdateCurrentPosition()
+end
+
+HereBeDragons.eventFrame:SetScript("OnEvent", OnEvent)
+HereBeDragons.eventFrame:UnregisterAllEvents()
+HereBeDragons.eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+HereBeDragons.eventFrame:RegisterEvent("ZONE_CHANGED")
+HereBeDragons.eventFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
+HereBeDragons.eventFrame:RegisterEvent("NEW_WMO_CHUNK")
+HereBeDragons.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+-- if we're loading after entering the world (ie. on demand), update position now
+if IsLoggedIn() then
+    UpdateCurrentPosition()
 end
 
 --- Return the localized zone name for a given mapID or mapFile
