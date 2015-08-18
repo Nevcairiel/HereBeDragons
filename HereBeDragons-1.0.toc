@@ -8,5 +8,6 @@
 ## Version: @project-version@
 
 LibStub\LibStub.lua
+CallbackHandler-1.0\CallbackHandler-1.0.lua
 
 HereBeDragons-1.0.lua

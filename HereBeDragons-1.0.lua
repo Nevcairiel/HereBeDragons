@@ -6,6 +6,8 @@ assert(LibStub, MAJOR .. " requires LibStub")
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
 if not HereBeDragons then return end
 
+local CBH = LibStub("CallbackHandler-1.0")
+
 HereBeDragons.eventFrame    = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData       = HereBeDragons.mapData or {}
@@ -13,6 +15,8 @@ HereBeDragons.continents    = HereBeDragons.continents or {}
 HereBeDragons.mapToID       = HereBeDragons.mapToID or {}
 HereBeDragons.microDungeons = HereBeDragons.microDungeons or {}
 HereBeDragons.transforms    = HereBeDragons.transforms or {}
+
+HereBeDragons.callbacks     = CBH:New(HereBeDragons, nil, nil, false)
 
 -- Lua upvalues
 local PI2 = math.pi * 2
@@ -340,7 +344,7 @@ local function UpdateCurrentPosition()
 
     if newMapID ~= currentPlayerZoneMapID or newLevel ~= currentPlayerLevel then
         currentPlayerZoneMapID, currentPlayerLevel = newMapID, newLevel
-        -- XXX: notification callback? could be useful to addons to let them know the active zone changed
+        HereBeDragons.callbacks:Fire("PlayerZoneChanged", currentPlayerZoneMapID, currentPlayerLevel)
     end
 end
 
