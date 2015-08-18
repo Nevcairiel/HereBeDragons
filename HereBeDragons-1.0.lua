@@ -43,6 +43,25 @@ local instanceIDOverrides = {
     [1465] = 1116, -- Tanaan
 }
 
+-- unregister and store all WORLD_MAP_UPDATE registrants, to avoid excess processing when
+-- retrieving info from stateful map APIs
+local wmuRegistry
+local function UnregisterWMU()
+    wmuRegistry = {GetFramesRegisteredForEvent("WORLD_MAP_UPDATE")}
+    for _, frame in ipairs(wmuRegistry) do
+        frame:UnregisterEvent("WORLD_MAP_UPDATE")
+    end
+end
+
+-- restore WORLD_MAP_UPDATE to all frames in the registry
+local function RestoreWMU()
+    assert(wmuRegistry)
+    for _, frame in ipairs(wmuRegistry) do
+        frame:RegisterEvent("WORLD_MAP_UPDATE")
+    end
+    wmuRegistry = nil
+end
+
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
 if not oldversion then
     local MAPS_TO_REMAP = {
@@ -215,6 +234,9 @@ if not oldversion then
     end
 
     local function gatherMapData()
+        -- unregister WMU to reduce the processing burden
+        UnregisterWMU()
+
         -- load transforms
         processTransforms()
 
@@ -240,6 +262,9 @@ if not oldversion then
 
         -- and finally, the microdungeons
         processMicroDungeons()
+
+        -- restore WMU
+        RestoreWMU()
     end
 
     gatherMapData()
