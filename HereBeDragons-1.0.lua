@@ -13,7 +13,14 @@ HereBeDragons.mapToID       = HereBeDragons.mapToID or {}
 HereBeDragons.microDungeons = HereBeDragons.microDungeons or {}
 HereBeDragons.transforms    = HereBeDragons.transforms or {}
 
+-- Lua upvalues
 local PI2 = math.pi * 2
+local atan2 = math.atan2
+local pairs, ipairs = pairs, ipairs
+local type = type
+
+-- WoW API upvalues
+local UnitPosition = UnitPosition
 
 -- Override instance ids for phased content
 local instanceIDOverrides = {
@@ -389,7 +396,7 @@ function HereBeDragons:GetWorldVector(instanceID, oX, oY, dX, dY)
     if not distance then return nil, nil end
 
     -- calculate the angle from deltaY and deltaX
-    local angle = math.atan2(deltaX, -deltaY)
+    local angle = atan2(deltaX, -deltaY)
 
     -- normalize the angle
     if angle > 0 then
