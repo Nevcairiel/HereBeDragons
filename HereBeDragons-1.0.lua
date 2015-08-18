@@ -22,6 +22,12 @@ local type = type
 -- WoW API upvalues
 local UnitPosition = UnitPosition
 
+-- data table upvalues
+local mapData = HereBeDragons.mapData -- table { width, height, left, top }
+local mapToID = HereBeDragons.mapToID
+local microDungeons = HereBeDragons.microDungeons
+local transforms = HereBeDragons.transforms
+
 -- Override instance ids for phased content
 local instanceIDOverrides = {
     -- Draenor
@@ -34,12 +40,6 @@ local instanceIDOverrides = {
     [1464] = 1116, -- Tanaan
     [1465] = 1116, -- Tanaan
 }
-
-
-local mapData = HereBeDragons.mapData -- table { width, height, left, top }
-local mapToID = HereBeDragons.mapToID
-local microDungeons = HereBeDragons.microDungeons
-local transforms = HereBeDragons.transforms
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
 if not oldversion then
