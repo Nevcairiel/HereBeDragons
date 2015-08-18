@@ -9,6 +9,7 @@ if not HereBeDragons then return end
 HereBeDragons.eventFrame = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData       = HereBeDragons.mapData or {}
+HereBeDragons.continents    = HereBeDragons.continents or {}
 HereBeDragons.mapToID       = HereBeDragons.mapToID or {}
 HereBeDragons.microDungeons = HereBeDragons.microDungeons or {}
 HereBeDragons.transforms    = HereBeDragons.transforms or {}
@@ -24,6 +25,7 @@ local UnitPosition = UnitPosition
 
 -- data table upvalues
 local mapData = HereBeDragons.mapData -- table { width, height, left, top }
+local continents = HereBeDragons.continents
 local mapToID = HereBeDragons.mapToID
 local microDungeons = HereBeDragons.microDungeons
 local transforms = HereBeDragons.transforms
@@ -139,8 +141,18 @@ if not oldversion then
         mapData[id].C = C or -100
         mapData[id].Z = Z or -100
 
-        if mapData[id].C > 0 and mapData[id].Z > 0 and not microDungeons[instanceID] then
-            microDungeons[instanceID] = {}
+        if mapData[id].C > 0 and mapData[id].Z > 0 then
+            if not microDungeons[instanceID] then
+                microDungeons[instanceID] = {}
+            end
+
+            -- store C/Z lookup table
+            if not continents[C] then
+                continents[C] = {}
+            end
+            if not continents[C][Z] then
+                continents[C][Z] = id
+            end
         end
 
         local numFloors = GetNumDungeonMapLevels()
@@ -301,6 +313,16 @@ end
 -- @param mapID Map ID
 function HereBeDragons:GetMapFileFromID(mapID)
     return mapData[mapID] and mapData[mapID].mapFile or nil
+end
+
+--- Lookup the map ID for a Continent / Zone index combination
+-- @param C continent index from GetCurrentMapContinent
+-- @param Z zone index from GetCurrentMapZone
+function HereBeDragons:GetMapIDFromCZ(C, Z)
+    if continents[C] then
+        return continents[C][Z]
+    end
+    return nil
 end
 
 --- Get the size of the zone
