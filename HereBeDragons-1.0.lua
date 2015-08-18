@@ -510,3 +510,28 @@ function HereBeDragons:GetPlayerWorldPosition()
     -- return transformed coordinates
     return applyCoordinateTransforms(x, y, instanceID)
 end
+
+--- Get the current zone and level of the player
+-- @return mapID, level
+function HereBeDragons:GetPlayerZone()
+    return currentPlayerZoneMapID, currentPlayerLevel
+end
+
+--- Get the current position of the player on a zone level
+-- The returned values are local point coordinates, 0-1
+-- @return x, y, mapID, level
+function HereBeDragons:GetPlayerZonePosition()
+    if not currentPlayerZoneMapID then return nil, nil, nil, nil end
+    local x, y, instanceID = self:GetPlayerWorldPosition()
+
+    --- XXX: remove or throttle
+    if mapData[currentPlayerZoneMapID] and mapData[currentPlayerZoneMapID].instance ~= instanceID then
+        print(format("HereBeDragons-1.0: Instance ID %d does not match %d for zone %d", instanceID, mapData[currentPlayerZoneMapID].instance, currentPlayerZoneMapID))
+    end
+
+    x, y = self:GetZoneCoordinatesFromWorld(x, y, currentPlayerZoneMapID, currentPlayerLevel)
+    if x and y then
+        return x, y, currentPlayerZoneMapID, currentPlayerLevel
+    end
+    return nil, nil, nil, nil
+end
