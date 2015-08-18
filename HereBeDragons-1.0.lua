@@ -3,7 +3,7 @@
 local MAJOR, MINOR = "HereBeDragons-1.0", 1
 assert(LibStub, MAJOR .. " requires LibStub")
 
-local HereBeDragons = LibStub:NewLibrary(MAJOR, MINOR)
+local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
 if not HereBeDragons then return end
 
 HereBeDragons.eventFrame = HereBeDragons.eventFrame or CreateFrame("Frame")
@@ -35,12 +35,14 @@ local instanceIDOverrides = {
     [1465] = 1116, -- Tanaan
 }
 
--- gather map info
+
 local mapData = HereBeDragons.mapData -- table { width, height, left, top }
 local mapToID = HereBeDragons.mapToID
 local microDungeons = HereBeDragons.microDungeons
 local transforms = HereBeDragons.transforms
-do
+
+-- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
+if not oldversion then
     local MAPS_TO_REMAP = {
          -- alliance garrison
         [973] = 971,
