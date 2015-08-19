@@ -8,7 +8,7 @@ if not HereBeDragons then return end
 
 local CBH = LibStub("CallbackHandler-1.0")
 
-HereBeDragons.eventFrame    = HereBeDragons.eventFrame or CreateFrame("Frame")
+HereBeDragons.eventFrame       = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData          = HereBeDragons.mapData or {}
 HereBeDragons.continentZoneMap = HereBeDragons.continentZoneMap or {}
