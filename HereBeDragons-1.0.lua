@@ -241,12 +241,14 @@ if not oldversion then
         if mapData[971] then
             mapData[971].Z = 5
             mapData[971].mapFile = "garrisonsmvalliance"
+            mapToID[mapData[971].mapFile] = 971
         end
 
         -- horde draenor garrison
         if mapData[976] then
             mapData[976].Z = 3
             mapData[976].mapFile = "garrisonffhorde"
+            mapToID[mapData[976].mapFile] = 976
         end
 
         -- remap zones with alias IDs
