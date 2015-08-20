@@ -166,7 +166,7 @@ if not oldversion then
         mapData[id].C = C or -100
         mapData[id].Z = Z or -100
 
-        if mapData[id].C > 0 and mapData[id].Z > 0 then
+        if mapData[id].C > 0 and mapData[id].Z >= 0 then
             if not microDungeons[instanceID] then
                 microDungeons[instanceID] = {}
             end
