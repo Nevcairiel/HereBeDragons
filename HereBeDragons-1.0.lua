@@ -447,7 +447,7 @@ end
 -- @param level Optional level of the zone
 function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level)
     local data = getMapDataTable(zone, level)
-    if not data then return nil, nil, nil end
+    if not data or data[0] == 0 or data[1] == 0 then return nil, nil, nil end
 
     local width, height, left, top = data[1], data[2], data[3], data[4]
     x, y = left - width * x, top - height * y
@@ -462,7 +462,7 @@ end
 -- @param level Optional level of the zone
 function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level)
     local data = getMapDataTable(zone, level)
-    if not data then return nil, nil end
+    if not data or data[0] == 0 or data[1] == 0 then return nil, nil end
 
     local width, height, left, top = data[1], data[2], data[3], data[4]
     x, y = (left - x) / width, (top - y) / height
@@ -495,7 +495,7 @@ end
 -- @return distance, deltaX, deltaY in yards
 function HereBeDragons:GetZoneDistance(zone, level, oX, oY, dX, dY)
     local data = getMapDataTable(zone, level)
-    if not data then return nil, nil, nil end
+    if not data or data[0] == 0 or data[1] == 0 then return nil, nil, nil end
 
     local x = (dX - oX) * data[1]
     local y = (dY - oY) * data[2]
