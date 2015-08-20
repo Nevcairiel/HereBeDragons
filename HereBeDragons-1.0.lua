@@ -11,8 +11,8 @@ local CBH = LibStub("CallbackHandler-1.0")
 HereBeDragons.eventFrame       = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData          = HereBeDragons.mapData or {}
-HereBeDragons.continentZoneMap = HereBeDragons.continentZoneMap or {}
-HereBeDragons.mapToID          = HereBeDragons.mapToID or {}
+HereBeDragons.continentZoneMap = HereBeDragons.continentZoneMap or { [-1] = { [0] = WORLDMAP_COSMIC_ID }, [0] = { [0] = WORLDMAP_AZEROTH_ID }}
+HereBeDragons.mapToID          = HereBeDragons.mapToID or { Cosmic = WORLDMAP_COSMIC_ID, World = WORLDMAP_AZEROTH_ID }
 HereBeDragons.microDungeons    = HereBeDragons.microDungeons or {}
 HereBeDragons.transforms       = HereBeDragons.transforms or {}
 
@@ -219,6 +219,24 @@ if not oldversion then
     end
 
     local function fixupZones()
+        -- fake cosmic map
+        mapData[WORLDMAP_COSMIC_ID] = {0, 0, 0, 0}
+        mapData[WORLDMAP_COSMIC_ID].instance = -1
+        mapData[WORLDMAP_COSMIC_ID].mapFile = "Cosmic"
+        mapData[WORLDMAP_COSMIC_ID].floors = {}
+        mapData[WORLDMAP_COSMIC_ID].C = -1
+        mapData[WORLDMAP_COSMIC_ID].Z = 0
+        mapData[WORLDMAP_COSMIC_ID].name = WORLD_MAP
+
+        -- fake world map
+        mapData[WORLDMAP_AZEROTH_ID] = {0, 0, 0, 0}
+        mapData[WORLDMAP_AZEROTH_ID].instance = -1
+        mapData[WORLDMAP_AZEROTH_ID].mapFile = "World"
+        mapData[WORLDMAP_AZEROTH_ID].floors = {}
+        mapData[WORLDMAP_AZEROTH_ID].C = 0
+        mapData[WORLDMAP_AZEROTH_ID].Z = 0
+        mapData[WORLDMAP_AZEROTH_ID].name = WORLD_MAP
+
         -- alliance draenor garrison
         if mapData[971] then
             mapData[971].Z = 5
@@ -296,7 +314,7 @@ end
 
 -- get the data table for a map and its level (floor)
 local function getMapDataTable(mapID, level)
-    if not mapID or mapID == WORLDMAP_COSMIC_ID then return nil end
+    if not mapID then return nil end
     if type(mapID) == "string" then
         mapID = mapID:gsub("_terrain%d+$", "")
         mapID = mapToID[mapID]
@@ -368,7 +386,6 @@ end
 --- Return the localized zone name for a given mapID or mapFile
 -- @param mapID numeric mapID or mapFile
 function HereBeDragons:GetLocalizedMap(mapID)
-    if mapID == WORLDMAP_COSMIC_ID then return WORLD_MAP end
     if type(mapID) == "string" then
         mapID = mapID:gsub("_terrain%d+$", "")
         mapID = mapToID[mapID]
