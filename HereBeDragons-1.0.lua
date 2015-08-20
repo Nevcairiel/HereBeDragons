@@ -240,15 +240,19 @@ if not oldversion then
         -- alliance draenor garrison
         if mapData[971] then
             mapData[971].Z = 5
-            mapData[971].mapFile = "garrisonsmvalliance"
-            mapToID[mapData[971].mapFile] = 971
+
+            mapToID["garrisonsmvalliance_tier1"] = 971
+            mapToID["garrisonsmvalliance_tier2"] = 971
+            mapToID["garrisonsmvalliance_tier3"] = 971
         end
 
         -- horde draenor garrison
         if mapData[976] then
             mapData[976].Z = 3
-            mapData[976].mapFile = "garrisonffhorde"
-            mapToID[mapData[976].mapFile] = 976
+
+            mapToID["garrisonffhorde_tier1"] = 976
+            mapToID["garrisonffhorde_tier2"] = 976
+            mapToID["garrisonffhorde_tier3"] = 976
         end
 
         -- remap zones with alias IDs
@@ -350,6 +354,15 @@ local function UpdateCurrentPosition()
 
     -- retrieve active values
     local newMapID, newLevel = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+
+    -- hack to update the mapfile for the garrison map (as it changes when the player updates his garrison)
+    -- its not ideal to only update it when the player is in the garrison, but updates should only really happen then
+    if newMapID == 971 or newMapID == 976 then
+        local mapFile = GetMapInfo()
+        if mapFile ~= mapData[newMapID].mapFile then
+            mapData[newMapID].mapFile = mapFile
+        end
+    end
 
     -- restore previous map
     if prevMapID and prevMapID ~= newMapID then
