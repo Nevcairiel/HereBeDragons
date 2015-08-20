@@ -34,7 +34,7 @@ local mapToID          = HereBeDragons.mapToID
 local microDungeons    = HereBeDragons.microDungeons
 local transforms       = HereBeDragons.transforms
 
-local currentPlayerZoneMapID, currentPlayerLevel
+local currentPlayerZoneMapID, currentPlayerLevel, currentMapFile
 
 -- Override instance ids for phased content
 local instanceIDOverrides = {
@@ -354,14 +354,12 @@ local function UpdateCurrentPosition()
 
     -- retrieve active values
     local newMapID, newLevel = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+    local mapFile, _, _, isMicroDungeon, microFile = GetMapInfo()
 
     -- hack to update the mapfile for the garrison map (as it changes when the player updates his garrison)
     -- its not ideal to only update it when the player is in the garrison, but updates should only really happen then
-    if newMapID == 971 or newMapID == 976 then
-        local mapFile = GetMapInfo()
-        if mapFile ~= mapData[newMapID].mapFile then
-            mapData[newMapID].mapFile = mapFile
-        end
+    if (newMapID == 971 or newMapID == 976) and mapFile ~= mapData[newMapID].mapFile then
+        mapData[newMapID].mapFile = mapFile
     end
 
     -- restore previous map
@@ -376,8 +374,12 @@ local function UpdateCurrentPosition()
     RestoreWMU()
 
     if newMapID ~= currentPlayerZoneMapID or newLevel ~= currentPlayerLevel then
-        currentPlayerZoneMapID, currentPlayerLevel = newMapID, newLevel
-        HereBeDragons.callbacks:Fire("PlayerZoneChanged", currentPlayerZoneMapID, currentPlayerLevel)
+        -- store micro dungeon map lookup, if available
+        if microFile and not mapToID[microFile] then mapToID[microFile] = currentPlayerZoneMapID end
+
+        -- update upvalues and signal callback
+        currentPlayerZoneMapID, currentPlayerLevel, currentMapFile = newMapID, newLevel, microFile or mapFile
+        HereBeDragons.callbacks:Fire("PlayerZoneChanged", currentPlayerZoneMapID, currentPlayerLevel, currentMapFile)
     end
 end
 
@@ -553,14 +555,15 @@ function HereBeDragons:GetPlayerWorldPosition()
 end
 
 --- Get the current zone and level of the player
--- @return mapID, level
+-- The returned mapFile can represent a micro dungeon, if the player currently is inside one.
+-- @return mapID, level, mapFile
 function HereBeDragons:GetPlayerZone()
-    return currentPlayerZoneMapID, currentPlayerLevel
+    return currentPlayerZoneMapID, currentPlayerLevel, currentMapFile
 end
 
 --- Get the current position of the player on a zone level
--- The returned values are local point coordinates, 0-1
--- @return x, y, mapID, level
+-- The returned values are local point coordinates, 0-1. The mapFile can represent a micro dungeon.
+-- @return x, y, mapID, level, mapFile
 function HereBeDragons:GetPlayerZonePosition()
     if not currentPlayerZoneMapID then return nil, nil, nil, nil end
     local x, y, instanceID = self:GetPlayerWorldPosition()
@@ -572,7 +575,7 @@ function HereBeDragons:GetPlayerZonePosition()
 
     x, y = self:GetZoneCoordinatesFromWorld(x, y, currentPlayerZoneMapID, currentPlayerLevel)
     if x and y then
-        return x, y, currentPlayerZoneMapID, currentPlayerLevel
+        return x, y, currentPlayerZoneMapID, currentPlayerLevel, currentMapFile
     end
     return nil, nil, nil, nil
 end
