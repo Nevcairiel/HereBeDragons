@@ -132,16 +132,16 @@ local function drawMinimapPin(pin, data)
         dist = dist^0.5
         diffX = diffX/dist
         diffY = diffY/dist
-        alpha = 2 - dist
     end
 
-    if dist <= 1 or (data.floatOnEdge and alpha > 0) then
+    if dist <= 1 or data.floatOnEdge then
         pin:Show()
         pin:ClearAllPoints()
         pin:SetPoint("CENTER", Minimap, "CENTER", diffX * minimapWidth, -diffY * minimapHeight)
-        pin:SetAlpha(alpha)
+        data.onEdge = (dist > 1)
     else
         pin:Hide()
+        data.onEdge = nil
         pin.keep = nil
     end
 end
@@ -409,6 +409,15 @@ function pins:AddMinimapIconMF(ref, icon, mapID, mapFloor, x, y, floatOnEdge)
     -- store extra information
     minimapPins[icon].mapID = mapID
     minimapPins[icon].floor = mapFloor
+end
+
+--- Check if a floating minimap icon is on the edge of the map
+-- @param icon the minimap icon
+function pins:IsMinimapIconOnEdge(icon)
+    local data = minimapPins[icon]
+    if not data then return nil end
+
+    return data.onEdge
 end
 
 --- Remove a minimap icon
