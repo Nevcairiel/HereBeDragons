@@ -571,7 +571,7 @@ function HereBeDragons:GetWorldVector(instanceID, oX, oY, dX, dY)
     if not distance then return nil, nil end
 
     -- calculate the angle from deltaY and deltaX
-    local angle = atan2(deltaX, -deltaY)
+    local angle = atan2(-deltaX, deltaY)
 
     -- normalize the angle
     if angle > 0 then
