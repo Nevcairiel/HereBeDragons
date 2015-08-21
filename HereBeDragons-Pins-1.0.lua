@@ -267,9 +267,43 @@ local function UpdateMinimapZoom()
     Minimap:SetZoom(zoom)
 end
 
+local function UpdateWorldMap()
+    if not WorldMapButton:IsVisible() then return end
+
+    local mapID, mapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+
+    -- not viewing a valid map
+    if not mapID or mapID == -1 then
+        for icon in pairs(worldmapPins) do
+            icon:Hide()
+        end
+        return
+    end
+
+    local instanceID = HBD.mapData[mapID] and HBD.mapData[mapID].instance or -1
+    local worldmapWidth  = WorldMapButton:GetWidth()
+    local worldmapHeight = WorldMapButton:GetHeight()
+
+    for icon, data in pairs(worldmapPins) do
+        if instanceID == data.instanceID and (not data.floor or (data.mapID == mapID and data.floor == mapFloor)) then
+            local x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, mapID, mapFloor)
+            if x and y then
+                icon:ClearAllPoints()
+                icon:SetPoint("CENTER", WorldMapButton, "TOPLEFT", x * worldmapWidth, -y * worldmapHeight)
+                icon:Show()
+            else
+                icon:Hide()
+            end
+        else
+            icon:Hide()
+        end
+    end
+end
+
 local function UpdateMaps()
     UpdateMinimapZoom()
     UpdateMinimapPins()
+    UpdateWorldMap()
 end
 
 local last_update = 0
@@ -298,7 +332,7 @@ local function OnEventHandler(frame, event, ...)
     elseif event == "PLAYER_ENTERING_WORLD" then
         UpdateMaps()
     elseif event == "WORLD_MAP_UPDATE" then
-        -- update worldmap
+        UpdateWorldMap()
     end
 end
 
@@ -398,4 +432,90 @@ function pins:RemoveAllMinimapIcons(ref)
     end
     wipe(minimapPinRegistry[ref])
     queueFullUpdate = true
+end
+
+--- Add a icon to the world map (x/y world coordinate version)
+-- Note: This API does not let you specify a floor, as floors are map-specific, not instance/world wide. Use the Map/Floor API to specify a floor.
+-- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
+-- @param icon Icon Frame
+-- @param instanceID Instance ID of the map to add the icon to
+-- @param x X position in world coordinates
+-- @param y Y position in world coordinates
+function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y)
+    if not ref then
+        error(MAJOR..": AddMinimapIconWorld: 'ref' must not be nil")
+    end
+    if type(icon) ~= "table" or not icon.SetPoint then
+        error(MAJOR..": AddMinimapIconWorld: 'icon' must be a frame", 2)
+    end
+    if type(instanceID) ~= "number" or type(x) ~= "number" or type(y) ~= "number" then
+        error(MAJOR..": AddMinimapIconWorld: 'instanceID', 'x' and 'y' must be numbers", 2)
+    end
+
+    if not worldmapPinRegistry[ref] then
+        worldmapPinRegistry[ref] = {}
+    end
+
+    worldmapPinRegistry[ref][icon] = true
+
+    local t = newCachedTable()
+    t.instanceID = instanceID
+    t.x = x
+    t.y = y
+    t.mapID = nil
+    t.floor = nil
+
+    worldmapPins[icon] = t
+    UpdateWorldMap()
+end
+
+--- Add a icon to the world map (mapid/floor coordinate version)
+-- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
+-- @param icon Icon Frame
+-- @param mapID Map ID of the map to place the icon on
+-- @param mapFloor Floor to place the icon on (or nil for all floors)
+-- @param x X position in local/point coordinates (0-1), relative to the zone
+-- @param y Y position in local/point coordinates (0-1), relative to the zone
+function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
+    if not ref then
+        error(MAJOR..": AddMinimapIconMF: 'ref' must not be nil")
+    end
+    if type(icon) ~= "table" or not icon.SetPoint then
+        error(MAJOR..": AddMinimapIconMF: 'icon' must be a frame")
+    end
+    if type(mapID) ~= "number" or type(x) ~= "number" or type(y) ~= "number" then
+        error(MAJOR..": AddMinimapIconMF: 'mapID', 'x' and 'y' must be numbers")
+    end
+
+    -- convert to world coordinates and use our known adding function
+    local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(x, y, mapID, mapFloor)
+    self:AddWorldMapIconWorld(ref, icon, instanceID, xCoord, yCoord, floatOnEdge)
+
+    -- store extra information
+    worldmapPins[icon].mapID = mapID
+    worldmapPins[icon].floor = mapFloor
+    UpdateWorldMap()
+end
+
+--- Remove a worldmap icon
+-- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
+-- @param icon Icon Frame
+function pins:RemoveWorldMapIcon(ref, icon)
+    if not worldmapPinRegistry[ref] then return end
+    worldmapPinRegistry[ref][icon] = nil
+    recycle(worldmapPins[icon])
+    worldmapPins[icon] = nil
+    UpdateWorldMap()
+end
+
+--- Remove all worldmap icons belonging to your addon (as tracked by "ref")
+-- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
+function pins:RemoveAllWorldMapIcons(ref)
+    if not worldmapPinRegistry[ref] then return end
+    for icon in pairs(worldmapPinRegistry[ref]) do
+        recycle(worldmapPins[icon])
+        worldmapPins[icon] = nil
+    end
+    wipe(worldmapPinRegistry[ref])
+    UpdateWorldMap()
 end
