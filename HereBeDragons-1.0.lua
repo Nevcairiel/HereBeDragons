@@ -500,7 +500,8 @@ end
 -- @param y Global Y position
 -- @param zone MapID or MapFile of the zone
 -- @param level Optional level of the zone
-function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level)
+-- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
+function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level, allowOutOfBounds)
     local data = getMapDataTable(zone, level)
     if not data or data[0] == 0 or data[1] == 0 then return nil, nil end
 
@@ -508,7 +509,7 @@ function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level)
     x, y = (left - x) / width, (top - y) / height
 
     -- verify the coordinates fall into the zone
-    if x < 0 or x > 1 or y < 0 or y > 1 then return nil, nil end
+    if not allowOutOfBounds and (x < 0 or x > 1 or y < 0 or y > 1) then return nil, nil end
 
     return x, y
 end
@@ -520,14 +521,15 @@ end
 -- @param oLevel Origin Zone Level
 -- @param dZone Destination Zone, mapID or mapFile
 -- @param dLevel Destination Zone Level
-function HereBeDragons:TranslateZoneCoordinates(x, y, oZone, oLevel, dZone, dLevel)
+-- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
+function HereBeDragons:TranslateZoneCoordinates(x, y, oZone, oLevel, dZone, dLevel, allowOutOfBounds)
     local xCoord, yCoord, instance = self:GetWorldCoordinatesFromZone(x, y, oZone, oLevel)
     if not xCoord then return nil, nil end
 
     local data = getMapDataTable(dZone, dLevel)
     if not data or data.instance ~= instance then return nil, nil end
 
-    return self:GetZoneCoordinatesFromWorld(xCoord, yCoord, dZone, dLevel)
+    return self:GetZoneCoordinatesFromWorld(xCoord, yCoord, dZone, dLevel, allowOutOfBounds)
 end
 
 --- Return the distance from an origin position to a destination position in the same instance/continent.
