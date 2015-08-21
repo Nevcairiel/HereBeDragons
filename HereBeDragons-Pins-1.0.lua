@@ -537,3 +537,16 @@ function pins:RemoveAllWorldMapIcons(ref)
     wipe(worldmapPinRegistry[ref])
     UpdateWorldMap()
 end
+
+--- Return the angle and distance from the player to the specified pin
+-- @param icon icon object (minimap or worldmap)
+-- @return angle, distance where angle is in radians and distance in yards
+function pins:GetVectorToIcon(icon)
+    local data = minimapPins[icon] or worldmapPins[icon]
+    if not data then return nil end
+
+    local x, y, instance = HBD:GetPlayerWorldPosition()
+    if instance ~= data.instanceID then return nil end
+
+    return HBD:GetWorldVector(instance, x, y, data.x, data.y)
+end
