@@ -577,11 +577,6 @@ function HereBeDragons:GetPlayerZonePosition()
     if not currentPlayerZoneMapID then return nil, nil, nil, nil end
     local x, y, instanceID = self:GetPlayerWorldPosition()
 
-    --- XXX: remove or throttle
-    if mapData[currentPlayerZoneMapID] and mapData[currentPlayerZoneMapID].instance ~= instanceID then
-        print(format("HereBeDragons-1.0: Instance ID %d does not match %d for zone %d", instanceID, mapData[currentPlayerZoneMapID].instance, currentPlayerZoneMapID))
-    end
-
     x, y = self:GetZoneCoordinatesFromWorld(x, y, currentPlayerZoneMapID, currentPlayerLevel)
     if x and y then
         return x, y, currentPlayerZoneMapID, currentPlayerLevel, currentMapFile
