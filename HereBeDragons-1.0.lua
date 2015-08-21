@@ -499,6 +499,23 @@ function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level)
     return x, y
 end
 
+--- Translate zone coordinates from one zone to another
+-- @param x X position in 0-1 point coordinates, relative to the origin zone
+-- @param y Y position in 0-1 point coordinates, relative to the origin zone
+-- @param oZone Origin Zone, mapID or mapFile
+-- @param oLevel Origin Zone Level
+-- @param dZone Destination Zone, mapID or mapFile
+-- @param dLevel Destination Zone Level
+function HereBeDragons:TranslateZoneCoordinates(x, y, oZone, oLevel, dZone, dLevel)
+    local xCoord, yCoord, instance = self:GetWorldCoordinatesFromZone(x, y, oZone, oLevel)
+    if not xCoord then return nil, nil end
+
+    local data = getMapDataTable(dZone, dLevel)
+    if not data or data.instance ~= instance then return nil, nil end
+
+    return self:GetZoneCoordinatesFromWorld(xCoord, yCoord, dZone, dLevel)
+end
+
 --- Return the distance from an origin position to a destination position in the same instance/continent.
 -- @param instanceID instance ID
 -- @param oX origin X
