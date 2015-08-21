@@ -467,7 +467,7 @@ function HereBeDragons:GetAllMapIDs()
 end
 
 --- Convert local/point coordinates to world coordinates in yards
--- @param x X position on 0-1 point coordinates
+-- @param x X position in 0-1 point coordinates
 -- @param y Y position in 0-1 point coordinates
 -- @param zone MapID or MapFile of the zone
 -- @param level Optional level of the zone
