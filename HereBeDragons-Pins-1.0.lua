@@ -20,7 +20,10 @@ pins.worldmapPins         = pins.worldmapPins or {}
 pins.worldmapPinRegistry  = pins.worldmapPinRegistry or {}
 
 -- upvalue lua api
-local cos, sin = math.cos, math.sin
+local cos, sin, max = math.cos, math.sin, math.max
+
+-- upvalue wow api
+local GetPlayerFacing = GetPlayerFacing
 
 -- upvalue data tables
 local minimapPins         = pins.minimapPins
