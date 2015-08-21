@@ -430,10 +430,19 @@ end
 -- @param C continent index from GetCurrentMapContinent
 -- @param Z zone index from GetCurrentMapZone
 function HereBeDragons:GetMapIDFromCZ(C, Z)
-    if continentZoneMap[C] then
-        return continentZoneMap[C][Z]
+    if C and continentZoneMap[C] then
+        return Z and continentZoneMap[C][Z]
     end
     return nil
+end
+
+--- Lookup the C/Z values for map
+-- @param mapID the MapID
+function HereBeDragons:GetCZFromMapID(mapID)
+    if mapData[mapID] then
+        return mapData[mapID].C, mapData[mapID].Z
+    end
+    return nil, nil
 end
 
 --- Get the size of the zone
