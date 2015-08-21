@@ -407,6 +407,8 @@ function pins:AddMinimapIconMF(ref, icon, mapID, mapFloor, x, y, floatOnEdge)
 
     -- convert to world coordinates and use our known adding function
     local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(x, y, mapID, mapFloor)
+    if not xCoord then return end
+
     self:AddMinimapIconWorld(ref, icon, instanceID, xCoord, yCoord, floatOnEdge)
 
     -- store extra information
@@ -501,6 +503,8 @@ function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
 
     -- convert to world coordinates
     local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(x, y, mapID, mapFloor)
+    if not xCoord then return end
+
     if not worldmapPinRegistry[ref] then
         worldmapPinRegistry[ref] = {}
     end
