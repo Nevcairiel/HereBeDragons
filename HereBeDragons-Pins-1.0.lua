@@ -487,13 +487,22 @@ function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
         error(MAJOR..": AddMinimapIconMF: 'mapID', 'x' and 'y' must be numbers")
     end
 
-    -- convert to world coordinates and use our known adding function
+    -- convert to world coordinates
     local xCoord, yCoord, instanceID = HBD:GetWorldCoordinatesFromZone(x, y, mapID, mapFloor)
-    self:AddWorldMapIconWorld(ref, icon, instanceID, xCoord, yCoord, floatOnEdge)
+    if not worldmapPinRegistry[ref] then
+        worldmapPinRegistry[ref] = {}
+    end
 
-    -- store extra information
-    worldmapPins[icon].mapID = mapID
-    worldmapPins[icon].floor = mapFloor
+    worldmapPinRegistry[ref][icon] = true
+
+    local t = newCachedTable()
+    t.instanceID = instanceID
+    t.x = xCoord
+    t.y = yCoord
+    t.mapID = mapID
+    t.floor = mapFloor
+
+    worldmapPins[icon] = t
     UpdateWorldMap()
 end
 
