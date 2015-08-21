@@ -456,6 +456,20 @@ function HereBeDragons:GetZoneSize(mapID, level)
     return data[1], data[2]
 end
 
+--- Get the number of floors for a map
+-- @param mapID map ID or mapFile of the zone
+function HereBeDragons:GetNumFloors(mapID)
+    if not mapID then return 0 end
+    if type(mapID) == "string" then
+        mapID = mapID:gsub("_terrain%d+$", "")
+        mapID = mapToID[mapID]
+    end
+
+    if not mapData[mapID] then return 0 end
+
+    return #(mapData[mapID].floors)
+end
+
 --- Get a list of all map IDs
 -- @return array-style table with all known/valid map IDs
 function HereBeDragons:GetAllMapIDs()
