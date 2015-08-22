@@ -107,17 +107,15 @@ local function drawMinimapPin(pin, data)
         yDist = dx*mapSin + dy*mapCos
     end
 
-    -- place pin on the map
-    local diffX, diffY, alpha = 0, 0, 1
     -- adapt delta position to the map radius
-    diffX = xDist / mapRadius
-    diffY = yDist / mapRadius
+    local diffX = xDist / mapRadius
+    local diffY = yDist / mapRadius
 
     -- different minimap shapes
     local isRound = true
     if minimapShape and not (xDist == 0 or yDist == 0) then
         isRound = (xDist < 0) and 1 or 3
-        if ( yDist < 0 ) then
+        if yDist < 0 then
             isRound = minimapShape[isRound]
         else
             isRound = minimapShape[isRound + 1]
@@ -132,7 +130,7 @@ local function drawMinimapPin(pin, data)
         dist = max(diffX*diffX, diffY*diffY) / 0.9^2
     end
 
-    -- if distance > 1, then adapt node position to slide on the border, and set the node alpha accordingly
+    -- if distance > 1, then adapt node position to slide on the border
     if dist > 1 and data.floatOnEdge then
         dist = dist^0.5
         diffX = diffX/dist
