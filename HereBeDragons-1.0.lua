@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 3
+local MAJOR, MINOR = "HereBeDragons-1.0", 4
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -544,21 +544,27 @@ function HereBeDragons:GetWorldDistance(instanceID, oX, oY, dX, dY)
     return (deltaX * deltaX + deltaY * deltaY)^0.5, deltaX, deltaY
 end
 
---- Return the distance between two points in the same zone
--- @param zone zone map id or mapfile
--- @param level optional zone level (floor)
+--- Return the distance between two points on the same continent
+-- @param oZone origin zone map id or mapfile
+-- @param oLevel optional origin zone level (floor)
 -- @param oX origin X, in local zone/point coordinates
 -- @param oY origin Y, in local zone/point coordinates
+-- @param dZone destination zone map id or mapfile
+-- @param dLevel optional destination zone level (floor)
 -- @param dX destination X, in local zone/point coordinates
 -- @param dY destination Y, in local zone/point coordinates
 -- @return distance, deltaX, deltaY in yards
-function HereBeDragons:GetZoneDistance(zone, level, oX, oY, dX, dY)
-    local data = getMapDataTable(zone, level)
-    if not data or data[0] == 0 or data[1] == 0 then return nil, nil, nil end
+function HereBeDragons:GetZoneDistance(oZone, oLevel, oX, oY, dZone, dLevel, dX, dY)
+    local oX, oY, oInstance = self:GetWorldCoordinatesFromZone(oX, oY, oZone, oLevel)
+    if not oX then return nil, nil, nil end
 
-    local x = (dX - oX) * data[1]
-    local y = (dY - oY) * data[2]
-    return (x*x + y*y)^0.5, x, y
+    -- translate dX, dY to the origin zone
+    local dX, dY, dInstance = self:GetWorldCoordinatesFromZone(dX, dY, dZone, dLevel)
+    if not dX then return nil, nil, nil end
+
+    if oInstance ~= dInstance then return nil, nil, nil end
+
+    return self:GetWorldDistance(oInstance, oX, oY, dX, dY)
 end
 
 --- Return the angle and distance from an origin position to a destination position in the same instance/continent.
