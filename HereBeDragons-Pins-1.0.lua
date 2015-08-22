@@ -488,11 +488,13 @@ function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y)
 
     worldmapPins[icon] = t
 
-    local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
-    if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID then
-        PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
-    else
-        icon:Hide()
+    if WorldMapButton:IsVisible() then
+        local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+        if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID then
+            PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
+        else
+            icon:Hide()
+        end
     end
 end
 
@@ -533,11 +535,13 @@ function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
 
     worldmapPins[icon] = t
 
-    local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
-    if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID and (not mapFloor or (currentMapID == mapID and currentMapFloor == mapFloor)) then
-        PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
-    else
-        icon:Hide()
+    if WorldMapButton:IsVisible() then
+        local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+        if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID and (not mapFloor or (currentMapID == mapID and currentMapFloor == mapFloor)) then
+            PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
+        else
+            icon:Hide()
+        end
     end
 end
 
