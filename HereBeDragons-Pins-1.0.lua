@@ -21,6 +21,7 @@ pins.worldmapPinRegistry  = pins.worldmapPinRegistry or {}
 
 -- upvalue lua api
 local cos, sin, max = math.cos, math.sin, math.max
+local type, pairs = type, pairs
 
 -- upvalue wow api
 local GetPlayerFacing = GetPlayerFacing
