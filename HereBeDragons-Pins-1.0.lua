@@ -1,6 +1,6 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
-local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 2
+local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 3
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -94,6 +94,8 @@ local indoors = GetCVar("minimapZoom")+0 == Minimap:GetZoom() and "outdoor" or "
 local minimapPinCount, queueFullUpdate = 0, false
 local minimapScale, minimapShape, mapRadius, minimapWidth, minimapHeight, mapSin, mapCos
 local lastZoom, lastFacing, lastXY, lastYY
+
+local worldmapWidth, worldmapHeight = WorldMapButton:GetWidth(), WorldMapButton:GetHeight()
 
 local function drawMinimapPin(pin, data)
     local xDist, yDist = lastXY - data.x, lastYY - data.y
@@ -270,6 +272,17 @@ local function UpdateMinimapZoom()
     Minimap:SetZoom(zoom)
 end
 
+local function PositionWorldMapIcon(icon, data, currentMapID, currentMapFloor)
+    local x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, currentMapID, currentMapFloor)
+    if x and y then
+        icon:ClearAllPoints()
+        icon:SetPoint("CENTER", WorldMapButton, "TOPLEFT", x * worldmapWidth, -y * worldmapHeight)
+        icon:Show()
+    else
+        icon:Hide()
+    end
+end
+
 local function UpdateWorldMap()
     if not WorldMapButton:IsVisible() then return end
 
@@ -284,19 +297,13 @@ local function UpdateWorldMap()
     end
 
     local instanceID = HBD.mapData[mapID] and HBD.mapData[mapID].instance or -1
-    local worldmapWidth  = WorldMapButton:GetWidth()
-    local worldmapHeight = WorldMapButton:GetHeight()
+
+    worldmapWidth  = WorldMapButton:GetWidth()
+    worldmapHeight = WorldMapButton:GetHeight()
 
     for icon, data in pairs(worldmapPins) do
         if instanceID == data.instanceID and (not data.floor or (data.mapID == mapID and data.floor == mapFloor)) then
-            local x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, mapID, mapFloor)
-            if x and y then
-                icon:ClearAllPoints()
-                icon:SetPoint("CENTER", WorldMapButton, "TOPLEFT", x * worldmapWidth, -y * worldmapHeight)
-                icon:Show()
-            else
-                icon:Hide()
-            end
+            PositionWorldMapIcon(icon, data, mapID, mapFloor)
         else
             icon:Hide()
         end
@@ -480,7 +487,13 @@ function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y)
     t.floor = nil
 
     worldmapPins[icon] = t
-    UpdateWorldMap()
+
+    local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+    if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID then
+        PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
+    else
+        icon:Hide()
+    end
 end
 
 --- Add a icon to the world map (mapid/floor coordinate version)
@@ -519,18 +532,24 @@ function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
     t.floor = mapFloor
 
     worldmapPins[icon] = t
-    UpdateWorldMap()
+
+    local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+    if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID and (not mapFloor or (currentMapID == mapID and currentMapFloor == mapFloor)) then
+        PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
+    else
+        icon:Hide()
+    end
 end
 
 --- Remove a worldmap icon
 -- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
 -- @param icon Icon Frame
 function pins:RemoveWorldMapIcon(ref, icon)
-    if not worldmapPinRegistry[ref] then return end
+    if not icon or not ref or not worldmapPinRegistry[ref] then return end
     worldmapPinRegistry[ref][icon] = nil
     recycle(worldmapPins[icon])
     worldmapPins[icon] = nil
-    UpdateWorldMap()
+    icon:Hide()
 end
 
 --- Remove all worldmap icons belonging to your addon (as tracked by "ref")
@@ -540,9 +559,9 @@ function pins:RemoveAllWorldMapIcons(ref)
     for icon in pairs(worldmapPinRegistry[ref]) do
         recycle(worldmapPins[icon])
         worldmapPins[icon] = nil
+        icon:Hide()
     end
     wipe(worldmapPinRegistry[ref])
-    UpdateWorldMap()
 end
 
 --- Return the angle and distance from the player to the specified pin
