@@ -70,11 +70,9 @@ end
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
 if not oldversion or oldversion < 7 then
-    -- wipe old data, if required
-    if oldversion and oldversion < 7 then
+    -- wipe old data, if required, otherwise the upgrade path isn't triggered
+    if oldversion then
         wipe(mapData)
-        wipe(transforms)
-        wipe(microDungeons)
     end
 
     local MAPS_TO_REMAP = {
@@ -98,6 +96,7 @@ if not oldversion or oldversion < 7 then
     }
 
     local function processTransforms()
+        wipe(transforms)
         for _, tID in ipairs(GetWorldMapTransforms()) do
             local terrainMapID, newTerrainMapID, _, _, transformMinY, transformMaxY, transformMinX, transformMaxX, offsetY, offsetX = GetWorldMapTransformInfo(tID)
             if offsetY ~= 0 or offsetX ~= 0 then
