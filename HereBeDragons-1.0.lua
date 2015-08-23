@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 6
+local MAJOR, MINOR = "HereBeDragons-1.0", 7
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -69,7 +69,7 @@ local function RestoreWMU()
 end
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion then
+if not oldversion or oldversion < 7 then
     local MAPS_TO_REMAP = {
          -- alliance garrison
         [973] = 971,
@@ -112,7 +112,7 @@ if not oldversion then
     local function applyMapTransforms(instanceID, left, right, top, bottom)
         for _, transformData in ipairs(transforms) do
             if transformData.instanceID == instanceID then
-                if transformData.minX <= left and transformData.maxX >= right and transformData.minY <= top and transformData.maxY >= bottom then
+                if left < transformData.maxX and right > transformData.minX and top < transformData.maxY and bottom > transformData.minY then
                     instanceID = transformData.newInstanceID
                     left   = left   + transformData.offsetX
                     right  = right  + transformData.offsetX
