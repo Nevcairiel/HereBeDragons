@@ -358,7 +358,7 @@ local function UpdateCurrentPosition()
 
     -- hack to update the mapfile for the garrison map (as it changes when the player updates his garrison)
     -- its not ideal to only update it when the player is in the garrison, but updates should only really happen then
-    if (newMapID == 971 or newMapID == 976) and mapFile ~= mapData[newMapID].mapFile then
+    if (newMapID == 971 or newMapID == 976) and mapData[newMapID] and mapFile ~= mapData[newMapID].mapFile then
         mapData[newMapID].mapFile = mapFile
     end
 
