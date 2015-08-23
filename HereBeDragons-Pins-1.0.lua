@@ -1,6 +1,6 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
-local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 5
+local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 6
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -425,6 +425,7 @@ end
 --- Check if a floating minimap icon is on the edge of the map
 -- @param icon the minimap icon
 function pins:IsMinimapIconOnEdge(icon)
+    if not icon then return false end
     local data = minimapPins[icon]
     if not data then return nil end
 
@@ -435,7 +436,7 @@ end
 -- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
 -- @param icon Icon Frame
 function pins:RemoveMinimapIcon(ref, icon)
-    if not ref or not minimapPinRegistry[ref] then return end
+    if not ref or not icon or not minimapPinRegistry[ref] then return end
     minimapPinRegistry[ref][icon] = nil
     if minimapPins[icon] then
         recycle(minimapPins[icon])
@@ -550,7 +551,7 @@ end
 -- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
 -- @param icon Icon Frame
 function pins:RemoveWorldMapIcon(ref, icon)
-    if not icon or not ref or not worldmapPinRegistry[ref] then return end
+    if not ref or not icon or not worldmapPinRegistry[ref] then return end
     worldmapPinRegistry[ref][icon] = nil
     if worldmapPins[icon] then
         recycle(worldmapPins[icon])
@@ -575,8 +576,9 @@ end
 -- @param icon icon object (minimap or worldmap)
 -- @return angle, distance where angle is in radians and distance in yards
 function pins:GetVectorToIcon(icon)
+    if not icon then return nil, nil end
     local data = minimapPins[icon] or worldmapPins[icon]
-    if not data then return nil end
+    if not data then return nil, nil end
 
     local x, y, instance = HBD:GetPlayerWorldPosition()
     if instance ~= data.instanceID then return nil end
