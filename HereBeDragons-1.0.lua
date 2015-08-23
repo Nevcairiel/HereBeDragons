@@ -70,6 +70,13 @@ end
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
 if not oldversion or oldversion < 7 then
+    -- wipe old data, if required
+    if oldversion and oldversion < 7 then
+        wipe(mapData)
+        wipe(transforms)
+        wipe(microDungeons)
+    end
+
     local MAPS_TO_REMAP = {
          -- alliance garrison
         [973] = 971,
