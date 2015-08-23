@@ -1,6 +1,6 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
-local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 3
+local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 4
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -191,7 +191,7 @@ local function UpdateMinimapPins(force)
         end
 
         for pin, data in pairs(minimapPins) do
-            if data.instanceID == instanceID and (not data.floor or (data.mapID == mapID and data.floor == mapFloor)) then
+            if data.instanceID == instanceID and (not data.floor or (data.floor == mapFloor and (data.floor == 0 or data.mapID == mapID))) then
                 activeMinimapPins[pin] = data
                 data.keep = true
                 -- draw the pin (this may reset data.keep if outside of the map)
@@ -301,7 +301,7 @@ local function UpdateWorldMap()
     worldmapHeight = WorldMapButton:GetHeight()
 
     for icon, data in pairs(worldmapPins) do
-        if instanceID == data.instanceID and (not data.floor or (data.mapID == mapID and data.floor == mapFloor)) then
+        if instanceID == data.instanceID and (not data.floor or (data.floor == mapFloor and (data.floor == 0 or data.mapID == mapID))) then
             PositionWorldMapIcon(icon, data, mapID, mapFloor)
         else
             icon:Hide()
@@ -536,7 +536,7 @@ function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
 
     if WorldMapButton:IsVisible() then
         local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
-        if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID and (not mapFloor or (currentMapID == mapID and currentMapFloor == mapFloor)) then
+        if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID and (not mapFloor or (currentMapFloor == mapFloor and (mapFloor == 0 or currentMapID == mapID))) then
             PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
         else
             icon:Hide()
