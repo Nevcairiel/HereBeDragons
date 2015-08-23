@@ -435,7 +435,7 @@ end
 -- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
 -- @param icon Icon Frame
 function pins:RemoveMinimapIcon(ref, icon)
-    if not minimapPinRegistry[ref] then return end
+    if not ref or not minimapPinRegistry[ref] then return end
     minimapPinRegistry[ref][icon] = nil
     if minimapPins[icon] then
         recycle(minimapPins[icon])
@@ -447,7 +447,7 @@ end
 --- Remove all minimap icons belonging to your addon (as tracked by "ref")
 -- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
 function pins:RemoveAllMinimapIcons(ref)
-    if not minimapPinRegistry[ref] then return end
+    if not ref or not minimapPinRegistry[ref] then return end
     for icon in pairs(minimapPinRegistry[ref]) do
         recycle(minimapPins[icon])
         minimapPins[icon] = nil
@@ -562,7 +562,7 @@ end
 --- Remove all worldmap icons belonging to your addon (as tracked by "ref")
 -- @param ref Reference to your addon to track the icon under (ie. your "self" or string identifier)
 function pins:RemoveAllWorldMapIcons(ref)
-    if not worldmapPinRegistry[ref] then return end
+    if not ref or not worldmapPinRegistry[ref] then return end
     for icon in pairs(worldmapPinRegistry[ref]) do
         recycle(worldmapPins[icon])
         worldmapPins[icon] = nil
