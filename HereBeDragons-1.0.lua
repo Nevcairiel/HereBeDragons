@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 7
+local MAJOR, MINOR = "HereBeDragons-1.0", 8
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -361,6 +361,11 @@ local function UpdateCurrentPosition()
     -- retrieve active values
     local newMapID, newLevel = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
     local mapFile, _, _, isMicroDungeon, microFile = GetMapInfo()
+
+    -- we want to ignore any terrain phasings
+    if mapFile then
+        mapFile = mapFile:gsub("_terrain%d+", "")
+    end
 
     -- hack to update the mapfile for the garrison map (as it changes when the player updates his garrison)
     -- its not ideal to only update it when the player is in the garrison, but updates should only really happen then
