@@ -364,7 +364,7 @@ local function UpdateCurrentPosition()
 
     -- we want to ignore any terrain phasings
     if mapFile then
-        mapFile = mapFile:gsub("_terrain%d+", "")
+        mapFile = mapFile:gsub("_terrain%d+$", "")
     end
 
     -- hack to update the mapfile for the garrison map (as it changes when the player updates his garrison)
