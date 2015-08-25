@@ -470,13 +470,13 @@ end
 -- @param y Y position in world coordinates
 function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y)
     if not ref then
-        error(MAJOR..": AddMinimapIconWorld: 'ref' must not be nil")
+        error(MAJOR..": AddWorldMapIconWorld: 'ref' must not be nil")
     end
     if type(icon) ~= "table" or not icon.SetPoint then
-        error(MAJOR..": AddMinimapIconWorld: 'icon' must be a frame", 2)
+        error(MAJOR..": AddWorldMapIconWorld: 'icon' must be a frame", 2)
     end
     if type(instanceID) ~= "number" or type(x) ~= "number" or type(y) ~= "number" then
-        error(MAJOR..": AddMinimapIconWorld: 'instanceID', 'x' and 'y' must be numbers", 2)
+        error(MAJOR..": AddWorldMapIconWorld: 'instanceID', 'x' and 'y' must be numbers", 2)
     end
 
     if not worldmapPinRegistry[ref] then
@@ -513,13 +513,13 @@ end
 -- @param y Y position in local/point coordinates (0-1), relative to the zone
 function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
     if not ref then
-        error(MAJOR..": AddMinimapIconMF: 'ref' must not be nil")
+        error(MAJOR..": AddWorldMapIconMF: 'ref' must not be nil")
     end
     if type(icon) ~= "table" or not icon.SetPoint then
-        error(MAJOR..": AddMinimapIconMF: 'icon' must be a frame")
+        error(MAJOR..": AddWorldMapIconMF: 'icon' must be a frame")
     end
     if type(mapID) ~= "number" or type(x) ~= "number" or type(y) ~= "number" then
-        error(MAJOR..": AddMinimapIconMF: 'mapID', 'x' and 'y' must be numbers")
+        error(MAJOR..": AddWorldMapIconMF: 'mapID', 'x' and 'y' must be numbers")
     end
 
     -- convert to world coordinates
