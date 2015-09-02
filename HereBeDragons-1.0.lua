@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 8
+local MAJOR, MINOR = "HereBeDragons-1.0", 9
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -353,7 +353,13 @@ local function UpdateCurrentPosition()
     UnregisterWMU()
 
     -- save active map and level
+    local prevContinent
     local prevMapID, prevLevel = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
+
+    -- handle continent maps (751 is the maelstrom continent, which fails with SetMapByID)
+    if not prevMapID or prevMapID < 0 or prevMapID == 751 then
+        prevContinent = GetCurrentMapContinent()
+    end
 
     -- set current map
     SetMapToCurrentZone()
@@ -374,12 +380,16 @@ local function UpdateCurrentPosition()
     end
 
     -- restore previous map
-    if prevMapID and prevMapID ~= newMapID then
-        SetMapByID(prevMapID)
-    end
-    -- and level
-    if prevLevel and prevLevel > 0 then
-        SetDungeonMapLevel(prevLevel)
+    if prevContinent then
+        SetMapZoom(prevContinent)
+    else
+        if prevMapID and prevMapID ~= newMapID then
+            SetMapByID(prevMapID)
+        end
+        -- and level
+        if prevLevel and prevLevel > 0 then
+            SetDungeonMapLevel(prevLevel)
+        end
     end
 
     RestoreWMU()
