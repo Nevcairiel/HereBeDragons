@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 10
+local MAJOR, MINOR = "HereBeDragons-1.0", 11
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -148,9 +148,10 @@ if not oldversion or oldversion < 10 then
         end
 
         -- dimensions of the map
-        local instanceID, _, _, left, right, top, bottom = GetAreaMapInfo(id)
+        local originalInstanceID, _, _, left, right, top, bottom = GetAreaMapInfo(id)
+        local instanceID = originalInstanceID
         if (left and top and right and bottom and (left ~= 0 or top ~= 0 or right ~= 0 or bottom ~= 0)) then
-            instanceID, left, right, top, bottom = applyMapTransforms(instanceID, left, right, top, bottom)
+            instanceID, left, right, top, bottom = applyMapTransforms(originalInstanceID, left, right, top, bottom)
             mapData[id] = { left - right, top - bottom, left, top }
         else
             mapData[id] = { 0, 0, 0, 0 }
@@ -198,6 +199,7 @@ if not oldversion or oldversion < 10 then
                 SetDungeonMapLevel(f)
                 local _, right, bottom, left, top = GetCurrentMapDungeonLevel()
                 if left and top and right and bottom then
+                    instanceID, left, right, top, bottom = applyMapTransforms(originalInstanceID, left, right, top, bottom)
                     mapData[id].floors[f] = { left - right, top - bottom, left, top }
                     mapData[id].floors[f].instance = mapData[id].instance
                 elseif f == 1 and DungeonUsesTerrainMap() then
