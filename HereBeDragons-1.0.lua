@@ -18,6 +18,9 @@ HereBeDragons.transforms       = HereBeDragons.transforms or {}
 
 HereBeDragons.callbacks        = CBH:New(HereBeDragons, nil, nil, false)
 
+-- constants
+local TERRAIN_MATCH = "_terrain%d+$"
+
 -- Lua upvalues
 local PI2 = math.pi * 2
 local atan2 = math.atan2
@@ -163,7 +166,7 @@ if not oldversion or oldversion < 10 then
         local mapFile = GetMapInfo()
         if mapFile then
             -- remove phased terrain from the map names
-            mapFile = mapFile:gsub("_terrain%d+$", "")
+            mapFile = mapFile:gsub(TERRAIN_MATCH, "")
 
             if not mapToID[mapFile] then mapToID[mapFile] = id end
             mapData[id].mapFile = mapFile
@@ -329,7 +332,7 @@ end
 local function getMapDataTable(mapID, level)
     if not mapID then return nil end
     if type(mapID) == "string" then
-        mapID = mapID:gsub("_terrain%d+$", "")
+        mapID = mapID:gsub(TERRAIN_MATCH, "")
         mapID = mapToID[mapID]
     end
     local data = mapData[mapID]
@@ -371,7 +374,7 @@ local function UpdateCurrentPosition()
 
     -- we want to ignore any terrain phasings
     if mapFile then
-        mapFile = mapFile:gsub("_terrain%d+$", "")
+        mapFile = mapFile:gsub(TERRAIN_MATCH, "")
     end
 
     -- hack to update the mapfile for the garrison map (as it changes when the player updates his garrison)
@@ -426,7 +429,7 @@ end
 -- @param mapID numeric mapID or mapFile
 function HereBeDragons:GetLocalizedMap(mapID)
     if type(mapID) == "string" then
-        mapID = mapID:gsub("_terrain%d+$", "")
+        mapID = mapID:gsub(TERRAIN_MATCH, "")
         mapID = mapToID[mapID]
     end
     return mapData[mapID] and mapData[mapID].name or nil
@@ -436,7 +439,7 @@ end
 -- @param mapFile Map File
 function HereBeDragons:GetMapIDFromFile(mapFile)
     if mapFile then
-        mapFile = mapFile:gsub("_terrain%d+$", "")
+        mapFile = mapFile:gsub(TERRAIN_MATCH, "")
         return mapToID[mapFile]
     end
     return nil
@@ -483,7 +486,7 @@ end
 function HereBeDragons:GetNumFloors(mapID)
     if not mapID then return 0 end
     if type(mapID) == "string" then
-        mapID = mapID:gsub("_terrain%d+$", "")
+        mapID = mapID:gsub(TERRAIN_MATCH, "")
         mapID = mapToID[mapID]
     end
 
