@@ -1,6 +1,6 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
-local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 7
+local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 8
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -456,6 +456,7 @@ function pins:RemoveAllMinimapIcons(ref)
     for icon in pairs(minimapPinRegistry[ref]) do
         recycle(minimapPins[icon])
         minimapPins[icon] = nil
+        icon:Hide()
     end
     wipe(minimapPinRegistry[ref])
     queueFullUpdate = true
