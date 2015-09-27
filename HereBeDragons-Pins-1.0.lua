@@ -451,7 +451,9 @@ function pins:RemoveMinimapIcon(ref, icon)
     if minimapPins[icon] then
         recycle(minimapPins[icon])
         minimapPins[icon] = nil
+        activeMinimapPins[icon] = nil
     end
+    icon:Hide()
     queueFullUpdate = true
 end
 
@@ -462,6 +464,7 @@ function pins:RemoveAllMinimapIcons(ref)
     for icon in pairs(minimapPinRegistry[ref]) do
         recycle(minimapPins[icon])
         minimapPins[icon] = nil
+        activeMinimapPins[icon] = nil
         icon:Hide()
     end
     wipe(minimapPinRegistry[ref])
