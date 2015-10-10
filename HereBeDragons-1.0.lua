@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 11
+local MAJOR, MINOR = "HereBeDragons-1.0", 12
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -614,6 +614,20 @@ function HereBeDragons:GetWorldVector(instanceID, oX, oY, dX, dY)
     end
 
     return angle, distance
+end
+
+--- Get the current world position of the specified unit
+-- The position is transformed to the current continent, if applicable
+-- NOTE: The same restrictions as for the UnitPosition() API apply,
+-- which means a very limited set of unit ids will actually work.
+-- @param unitId Unit Id
+-- @return x, y, instanceID
+function HereBeDragons:GetUnitWorldPosition(unitId)
+    -- get the current position
+    local y, x, z, instanceID = UnitPosition(unitId)
+
+    -- return transformed coordinates
+    return applyCoordinateTransforms(x, y, instanceID)
 end
 
 --- Get the current world position of the player
