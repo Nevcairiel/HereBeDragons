@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 12
+local MAJOR, MINOR = "HereBeDragons-1.0", 13
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -48,6 +48,7 @@ local instanceIDOverrides = {
     [1158] = 1116, -- Alliance Garrison 1
     [1159] = 1116, -- Alliance Garrison 2
     [1160] = 1116, -- Alliance Garrison 3
+    [1191] = 1116, -- Ashran PvP Zone
     [1464] = 1116, -- Tanaan
     [1465] = 1116, -- Tanaan
 }
