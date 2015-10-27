@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 13
+local MAJOR, MINOR = "HereBeDragons-1.0", 14
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -339,11 +339,11 @@ local function getMapDataTable(mapID, level)
     local data = mapData[mapID]
     if not data then return nil end
 
-    if (level == nil or level == 0) and data.fakefloor then
+    if (type(level) ~= "number" or level == 0) and data.fakefloor then
         level = 1
     end
 
-    if level and level > 0 then
+    if type(level) == "number" and level > 0 then
         if data.floors[level] then
             return data.floors[level]
         elseif microDungeons[data.instance] and microDungeons[data.instance][level] then
