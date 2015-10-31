@@ -654,12 +654,13 @@ end
 
 --- Get the current position of the player on a zone level
 -- The returned values are local point coordinates, 0-1. The mapFile can represent a micro dungeon.
+-- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
 -- @return x, y, mapID, level, mapFile, isMicroDungeon
-function HereBeDragons:GetPlayerZonePosition()
+function HereBeDragons:GetPlayerZonePosition(allowOutOfBounds)
     if not currentPlayerZoneMapID then return nil, nil, nil, nil end
     local x, y, instanceID = self:GetPlayerWorldPosition()
 
-    x, y = self:GetZoneCoordinatesFromWorld(x, y, currentPlayerZoneMapID, currentPlayerLevel)
+    x, y = self:GetZoneCoordinatesFromWorld(x, y, currentPlayerZoneMapID, currentPlayerLevel, allowOutOfBounds)
     if x and y then
         return x, y, currentPlayerZoneMapID, currentPlayerLevel, currentMapFile, currentMapIsMicroDungeon
     end
