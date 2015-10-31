@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 14
+local MAJOR, MINOR = "HereBeDragons-1.0", 15
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -73,7 +73,7 @@ local function RestoreWMU()
 end
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion or oldversion < 10 then
+if not oldversion or oldversion < 15 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
@@ -178,10 +178,6 @@ if not oldversion or oldversion < 10 then
         mapData[id].Z = Z or -100
 
         if mapData[id].C > 0 and mapData[id].Z >= 0 then
-            if not microDungeons[instanceID] then
-                microDungeons[instanceID] = {}
-            end
-
             -- store C/Z lookup table
             if not continentZoneMap[C] then
                 continentZoneMap[C] = {}
@@ -210,6 +206,13 @@ if not oldversion or oldversion < 10 then
                     mapData[id].floors[f] = { mapData[id][1], mapData[id][2], mapData[id][3], mapData[id][4] }
                     mapData[id].floors[f].instance = mapData[id].instance
                 end
+            end
+        end
+
+        -- setup microdungeon storage if the its a zone map or has no floors of its own
+        if (mapData[id].C > 0 and mapData[id].Z > 0) or numFloors == 0 then
+            if not microDungeons[instanceID] then
+                microDungeons[instanceID] = {}
             end
         end
     end
