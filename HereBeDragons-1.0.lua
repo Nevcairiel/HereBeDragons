@@ -57,6 +57,8 @@ local instanceIDOverrides = {
     [1402] = 1116, -- Gorgrond Finale Scenario
     [1464] = 1116, -- Tanaan
     [1465] = 1116, -- Tanaan
+    -- Legion
+    [1478] = 1220, -- Temple of Elune Scenario (Val'Sharah)
 }
 
 -- unregister and store all WORLD_MAP_UPDATE registrants, to avoid excess processing when
