@@ -61,6 +61,7 @@ local instanceIDOverrides = {
     [1465] = 1116, -- Tanaan
     -- Legion
     [1478] = 1220, -- Temple of Elune Scenario (Val'Sharah)
+    [1502] = 1220, -- Dalaran Underbelly
 }
 
 -- unregister and store all WORLD_MAP_UPDATE registrants, to avoid excess processing when
