@@ -18,6 +18,8 @@ HereBeDragons.transforms       = HereBeDragons.transforms or {}
 
 HereBeDragons.callbacks        = CBH:New(HereBeDragons, nil, nil, false)
 
+local IsLegion = select(4, GetBuildInfo()) >= 70000
+
 -- constants
 local TERRAIN_MATCH = "_terrain%d+$"
 
@@ -195,30 +197,38 @@ if not oldversion or oldversion < 15 then
             end
         end
 
-        local numFloors = GetNumDungeonMapLevels() or 0
-        if numFloors == 0 and GetCurrentMapDungeonLevel() == 1 then
-            numFloors = 1
-            mapData[id].fakefloor = true
+        local floors
+        if IsLegion then
+            floors = { GetNumDungeonMapLevels() }
+        else
+            floors = {}
+            for f = 1, GetNumDungeonMapLevels() do
+                floors[f] = f
+            end
+        end
+        if #floors == 0 and GetCurrentMapDungeonLevel() > 0 then
+            floors[1] = GetCurrentMapDungeonLevel()
+            mapData[id].fakefloor = GetCurrentMapDungeonLevel()
         end
 
         mapData[id].floors = {}
-        if numFloors > 0 then
-            for f = 1, numFloors do
-                SetDungeonMapLevel(f)
-                local _, right, bottom, left, top = GetCurrentMapDungeonLevel()
-                if left and top and right and bottom then
-                    instanceID, left, right, top, bottom = applyMapTransforms(originalInstanceID, left, right, top, bottom)
-                    mapData[id].floors[f] = { left - right, top - bottom, left, top }
-                    mapData[id].floors[f].instance = mapData[id].instance
-                elseif f == 1 and DungeonUsesTerrainMap() then
-                    mapData[id].floors[f] = { mapData[id][1], mapData[id][2], mapData[id][3], mapData[id][4] }
-                    mapData[id].floors[f].instance = mapData[id].instance
-                end
+        mapData[id].numFloors = #floors
+        for i = 1, mapData[id].numFloors do
+            local f = floors[i]
+            SetDungeonMapLevel(f)
+            local _, right, bottom, left, top = GetCurrentMapDungeonLevel()
+            if left and top and right and bottom then
+                instanceID, left, right, top, bottom = applyMapTransforms(originalInstanceID, left, right, top, bottom)
+                mapData[id].floors[f] = { left - right, top - bottom, left, top }
+                mapData[id].floors[f].instance = mapData[id].instance
+            elseif f == 1 and DungeonUsesTerrainMap() then
+                mapData[id].floors[f] = { mapData[id][1], mapData[id][2], mapData[id][3], mapData[id][4] }
+                mapData[id].floors[f].instance = mapData[id].instance
             end
         end
 
         -- setup microdungeon storage if the its a zone map or has no floors of its own
-        if (mapData[id].C > 0 and mapData[id].Z > 0) or numFloors == 0 then
+        if (mapData[id].C > 0 and mapData[id].Z > 0) or mapData[id].numFloors == 0 then
             if not microDungeons[instanceID] then
                 microDungeons[instanceID] = {}
             end
@@ -351,7 +361,7 @@ local function getMapDataTable(mapID, level)
     if not data then return nil end
 
     if (type(level) ~= "number" or level == 0) and data.fakefloor then
-        level = 1
+        level = data.fakefloor
     end
 
     if type(level) == "number" and level > 0 then
@@ -502,9 +512,9 @@ function HereBeDragons:GetNumFloors(mapID)
         mapID = mapToID[mapID]
     end
 
-    if not mapData[mapID] then return 0 end
+    if not mapData[mapID] or not mapData[mapID].numFloors then return 0 end
 
-    return #(mapData[mapID].floors)
+    return mapData[mapID].numFloors
 end
 
 --- Get a list of all map IDs
