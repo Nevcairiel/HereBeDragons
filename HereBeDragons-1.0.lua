@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 18
+local MAJOR, MINOR = "HereBeDragons-1.0", 19
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -655,6 +655,7 @@ end
 function HereBeDragons:GetUnitWorldPosition(unitId)
     -- get the current position
     local y, x, z, instanceID = UnitPosition(unitId)
+    if not x or not y then return nil, nil, nil end
 
     -- return transformed coordinates
     return applyCoordinateTransforms(x, y, instanceID)
@@ -666,6 +667,7 @@ end
 function HereBeDragons:GetPlayerWorldPosition()
     -- get the current position
     local y, x, z, instanceID = UnitPosition("player")
+    if not x or not y then return nil, nil, nil end
 
     -- return transformed coordinates
     return applyCoordinateTransforms(x, y, instanceID)
@@ -685,6 +687,7 @@ end
 function HereBeDragons:GetPlayerZonePosition(allowOutOfBounds)
     if not currentPlayerZoneMapID then return nil, nil, nil, nil end
     local x, y, instanceID = self:GetPlayerWorldPosition()
+    if not x or not y then return nil, nil, nil, nil end
 
     x, y = self:GetZoneCoordinatesFromWorld(x, y, currentPlayerZoneMapID, currentPlayerLevel, allowOutOfBounds)
     if x and y then
