@@ -276,7 +276,7 @@ local function UpdateMinimapZoom()
 end
 
 local function PositionWorldMapIcon(icon, data, currentMapID, currentMapFloor)
-    local x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, currentMapID, currentMapFloor)
+    local x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, currentMapID, (currentMapID == 0 and data.instanceID or currentMapFloor))
     if x and y then
         icon:ClearAllPoints()
         icon:SetPoint("CENTER", WorldMapButton, "TOPLEFT", x * worldmapWidth, -y * worldmapHeight)
@@ -291,6 +291,10 @@ local function UpdateWorldMap()
 
     local mapID, mapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
 
+    if mapID == -1 and GetCurrentMapContinent()==0 then
+        mapID = 0  -- force 0=Azeroth
+    end
+
     -- not viewing a valid map
     if not mapID or mapID == -1 then
         for icon in pairs(worldmapPins) do
@@ -299,13 +303,14 @@ local function UpdateWorldMap()
         return
     end
 
-    local instanceID = HBD.mapData[mapID] and HBD.mapData[mapID].instance or -1
+    local mapData = HBD.mapData[mapID]
+    local instanceID = mapData and mapData.instance or -1
 
     worldmapWidth  = WorldMapButton:GetWidth()
     worldmapHeight = WorldMapButton:GetHeight()
 
     for icon, data in pairs(worldmapPins) do
-        if instanceID == data.instanceID and (not data.floor or (data.floor == mapFloor and (data.floor == 0 or data.mapID == mapID))) then
+        if (instanceID == data.instanceID or mapID==0) and (not data.floor or (data.floor == mapFloor and (data.floor == 0 or data.mapID == mapID))) then
             PositionWorldMapIcon(icon, data, mapID, mapFloor)
         else
             icon:Hide()
@@ -514,7 +519,11 @@ function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y)
 
     if WorldMapButton:IsVisible() then
         local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
-        if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID then
+        if currentMapID == -1 and GetCurrentMapContinent()==0 then
+            currentMapID = 0  -- force 0=Azeroth
+        end
+        local mapData = HBD.mapData[currentMapID]
+        if currentMapID and mapData and (mapData.instance == instanceID or currentMapID == 0) then
             PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
         else
             icon:Hide()
@@ -561,7 +570,11 @@ function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
 
     if WorldMapButton:IsVisible() then
         local currentMapID, currentMapFloor = GetCurrentMapAreaID(), GetCurrentMapDungeonLevel()
-        if currentMapID and HBD.mapData[currentMapID] and HBD.mapData[currentMapID].instance == instanceID and (not mapFloor or (currentMapFloor == mapFloor and (mapFloor == 0 or currentMapID == mapID))) then
+        if currentMapID == -1 and GetCurrentMapContinent()==0 then
+            currentMapID = 0  -- force 0=Azeroth
+        end
+        local mapData = HBD.mapData[currentMapID]
+        if currentMapID and mapData and (mapData.instance == instanceID or currentMapID == 0) and (not mapFloor or (currentMapFloor == mapFloor and (mapFloor == 0 or currentMapID == mapID))) then
             PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
         else
             icon:Hide()
