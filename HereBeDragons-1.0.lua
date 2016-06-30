@@ -276,10 +276,35 @@ if not oldversion or oldversion < 20 then
         mapData[WORLDMAP_COSMIC_ID].name = WORLD_MAP
 
         -- fake world map
-        mapData[WORLDMAP_AZEROTH_ID] = {0, 0, 0, 0}
+        mapData[WORLDMAP_AZEROTH_ID] = {63570, 42382, 53730, 19600} -- sizes for Eastern Kingdoms, or floor 0
         mapData[WORLDMAP_AZEROTH_ID].instance = -1
         mapData[WORLDMAP_AZEROTH_ID].mapFile = "World"
-        mapData[WORLDMAP_AZEROTH_ID].floors = {}
+        mapData[WORLDMAP_AZEROTH_ID].floors = {
+            [1] = { -- Kalimdor
+                [1] = 65700,
+                [2] = 43795,
+                [3] = 11900,
+                [4] = 23760,
+            },
+            [571] = { -- Northrend
+                [1] = 65700,
+                [2] = 43795,
+                [3] = 33440,
+                [4] = 11960,
+            },
+            [870] = { -- Pandaria
+                [1] = 58520,
+                [2] = 39015,
+                [3] = 29070,
+                [4] = 34410,
+            },
+            [1220] = { -- Broken Isles
+                [1] = 96710,
+                [2] = 64476,
+                [3] = 63100,
+                [4] = 29960
+            }
+        }
         mapData[WORLDMAP_AZEROTH_ID].C = 0
         mapData[WORLDMAP_AZEROTH_ID].Z = 0
         mapData[WORLDMAP_AZEROTH_ID].name = WORLD_MAP
@@ -308,53 +333,6 @@ if not oldversion or oldversion < 20 then
                 mapData[remapID] = mapData[validMapID]
             end
         end
-		
-        local continentSizes = {
-            [WORLDMAP_AZEROTH_ID] = {
-                [1] = 63570, -- Eastern Kingdoms, or floor 0
-                [2] = 42382,
-                [3] = 53730,
-                [4] = 19600,
-                floors = {
-                    [0] = { 1,1,1,1, "just here to fool some functions that check floors[num]" },
-                    [1] = { -- Kalimdor
-                        [1] = 65700,
-                        [2] = 43795,
-                        [3] = 11900,
-                        [4] = 23760,
-                    },
-                    [571] = { -- Northrend
-                        [1] = 65700,
-                        [2] = 43795,
-                        [3] = 33440,
-                        [4] = 11960,
-                    },
-                    [870] = { -- Pandaria
-                        [1] = 58520,
-                        [2] = 39015,
-                        [3] = 29070,
-                        [4] = 34410,
-                    },
-                    [1220] = { -- Broken Isles
-                        [1] = 96710,
-                        [2] = 64476,
-                        [3] = 63100,
-                        [4] = 29960
-                    }
-                }
-            },
-        }
-        local function mergeHardcodedData(src,dst)
-            for k,v in pairs(src) do
-                if type(v)=="table" then
-                    if not dst[k] then dst[k]={} end
-                    mergeHardcodedData(v,dst[k])
-                else
-                    dst[k]=v
-                end
-            end
-        end
-        mergeHardcodedData(continentSizes,mapData)
     end
 
     local function gatherMapData()

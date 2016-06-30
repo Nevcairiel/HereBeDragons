@@ -276,7 +276,7 @@ local function UpdateMinimapZoom()
 end
 
 local function PositionWorldMapIcon(icon, data, currentMapID, currentMapFloor)
-    local x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, currentMapID, (currentMapID ~= 0 and currentMapFloor or data.instanceID))
+    local x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, currentMapID, (currentMapID == 0 and data.instanceID or currentMapFloor))
     if x and y then
         icon:ClearAllPoints()
         icon:SetPoint("CENTER", WorldMapButton, "TOPLEFT", x * worldmapWidth, -y * worldmapHeight)
@@ -310,7 +310,7 @@ local function UpdateWorldMap()
     worldmapHeight = WorldMapButton:GetHeight()
 
     for icon, data in pairs(worldmapPins) do
-        if (instanceID == data.instanceID or mapData.floors[data.instanceID]) and (not data.floor or (data.floor == mapFloor and (data.floor == 0 or data.mapID == mapID))) then
+        if (instanceID == data.instanceID or mapID==0) and (not data.floor or (data.floor == mapFloor and (data.floor == 0 or data.mapID == mapID))) then
             PositionWorldMapIcon(icon, data, mapID, mapFloor)
         else
             icon:Hide()
@@ -523,7 +523,7 @@ function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y)
             currentMapID = 0  -- force 0=Azeroth
         end
         local mapData = HBD.mapData[currentMapID]
-        if currentMapID and mapData and (mapData.instance == instanceID or mapData.floors[instanceID]) then
+        if currentMapID and mapData and (mapData.instance == instanceID or currentMapID == 0) then
             PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
         else
             icon:Hide()
@@ -574,7 +574,7 @@ function pins:AddWorldMapIconMF(ref, icon, mapID, mapFloor, x, y)
             currentMapID = 0  -- force 0=Azeroth
         end
         local mapData = HBD.mapData[currentMapID]
-        if currentMapID and mapData and (mapData.instance == instanceID or mapData.floors[instanceID]) and (not mapFloor or (currentMapFloor == mapFloor and (mapFloor == 0 or currentMapID == mapID))) then
+        if currentMapID and mapData and (mapData.instance == instanceID or currentMapID == 0) and (not mapFloor or (currentMapFloor == mapFloor and (mapFloor == 0 or currentMapID == mapID))) then
             PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
         else
             icon:Hide()
