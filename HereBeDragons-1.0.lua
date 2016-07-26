@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 22
+local MAJOR, MINOR = "HereBeDragons-1.0", 23
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -413,6 +413,7 @@ local function getMapDataTable(mapID, level)
     end
 end
 
+local StartUpdateTimer
 local function UpdateCurrentPosition()
     UnregisterWMU()
 
@@ -467,9 +468,29 @@ local function UpdateCurrentPosition()
         HereBeDragons.callbacks:Fire("PlayerZoneChanged", currentPlayerZoneMapID, currentPlayerLevel, currentMapFile, currentMapIsMicroDungeon)
     end
 
-    -- run a timed update in micro dungeons to detect floor changes, as multi-level micro dungeons do not reliably fire events
+    -- start a timer to update in micro dungeons since multi-level micro dungeons do not reliably fire events
     if isMicroDungeon then
-        C_Timer.After(1, UpdateCurrentPosition)
+        StartUpdateTimer()
+    end
+end
+
+-- upgradeable timer callback, don't want to keep calling the old function if the library is upgraded
+HereBeDragons.UpdateCurrentPosition = UpdateCurrentPosition
+local function UpdateTimerCallback()
+    -- signal that the timer ran
+    HereBeDragons.updateTimerActive = nil
+
+    -- run update now
+    HereBeDragons.UpdateCurrentPosition()
+end
+
+function StartUpdateTimer()
+    if not HereBeDragons.updateTimerActive then
+        -- prevent running multiple timers
+        HereBeDragons.updateTimerActive = true
+
+        -- and queue an update
+        C_Timer.After(1, UpdateTimerCallback)
     end
 end
 
