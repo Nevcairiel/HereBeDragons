@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 26
+local MAJOR, MINOR = "HereBeDragons-1.0", 27
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -64,6 +64,7 @@ local instanceIDOverrides = {
     [1502] = 1220, -- Dalaran Underbelly
     [1533] = 0,    -- Karazhan Artifact Scenario
     [1612] = 1220, -- Feral Druid Artifact Scenario (Suramar)
+    [1626] = 1220, -- Suramar Withered Scenario
 }
 
 -- unregister and store all WORLD_MAP_UPDATE registrants, to avoid excess processing when
