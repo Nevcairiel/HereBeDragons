@@ -18,8 +18,6 @@ HereBeDragons.transforms       = HereBeDragons.transforms or {}
 
 HereBeDragons.callbacks        = CBH:New(HereBeDragons, nil, nil, false)
 
-local IsLegion = select(4, GetBuildInfo()) >= 70000
-
 -- constants
 local TERRAIN_MATCH = "_terrain%d+$"
 
@@ -205,22 +203,17 @@ if not oldversion or oldversion < 26 then
             end
         end
 
-        local floors
-        if IsLegion then
-            floors = { GetNumDungeonMapLevels() }
+        -- retrieve floors
+        local floors = { GetNumDungeonMapLevels() }
 
-            -- offset floors for terrain map
-            if DungeonUsesTerrainMap() then
-                for i = 1, #floors do
-                    floors[i] = floors[i] + 1
-                end
-            end
-        else
-            floors = {}
-            for f = 1, GetNumDungeonMapLevels() do
-                floors[f] = f
+        -- offset floors for terrain map
+        if DungeonUsesTerrainMap() then
+            for i = 1, #floors do
+                floors[i] = floors[i] + 1
             end
         end
+
+        -- check for fake floors
         if #floors == 0 and GetCurrentMapDungeonLevel() > 0 then
             floors[1] = GetCurrentMapDungeonLevel()
             mapData[id].fakefloor = GetCurrentMapDungeonLevel()
@@ -308,16 +301,6 @@ if not oldversion or oldversion < 26 then
         mapData[WORLDMAP_AZEROTH_ID].C = 0
         mapData[WORLDMAP_AZEROTH_ID].Z = 0
         mapData[WORLDMAP_AZEROTH_ID].name = WORLD_MAP
-
-        -- we only have data for legion clients, zeroing the coordinates
-        -- and niling out the floors temporarily disables the logic on live
-        if not IsLegion then
-            mapData[WORLDMAP_AZEROTH_ID][1] = 0
-            mapData[WORLDMAP_AZEROTH_ID][2] = 0
-            mapData[WORLDMAP_AZEROTH_ID][3] = 0
-            mapData[WORLDMAP_AZEROTH_ID][4] = 0
-            mapData[WORLDMAP_AZEROTH_ID].floors = {}
-        end
 
         -- alliance draenor garrison
         if mapData[971] then
