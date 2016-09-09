@@ -59,6 +59,7 @@ local instanceIDOverrides = {
     [1465] = 1116, -- Tanaan
     -- Legion
     [1478] = 1220, -- Temple of Elune Scenario (Val'Sharah)
+    [1495] = 1220, -- Protection Paladin Artifact Scenario (Stormheim)
     [1502] = 1220, -- Dalaran Underbelly
     [1533] = 0,    -- Karazhan Artifact Scenario
     [1612] = 1220, -- Feral Druid Artifact Scenario (Suramar)
