@@ -172,6 +172,7 @@ local function UpdateMinimapPins(force)
 
     -- check for all values to be available (starting with 7.1.0, instances don't report coordinates)
     if not x or not y or not facing then
+        minimapPinCount = 0
         for pin, data in pairs(activeMinimapPins) do
             pin:Hide()
             activeMinimapPins[pin] = nil
