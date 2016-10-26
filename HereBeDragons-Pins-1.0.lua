@@ -1,6 +1,6 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
-local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 14
+local MAJOR, MINOR = "HereBeDragons-Pins-1.0", 15
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -638,7 +638,7 @@ function pins:GetVectorToIcon(icon)
     if not data then return nil, nil end
 
     local x, y, instance = HBD:GetPlayerWorldPosition()
-    if instance ~= data.instanceID then return nil end
+    if not x or not y or instance ~= data.instanceID then return nil end
 
     return HBD:GetWorldVector(instance, x, y, data.x, data.y)
 end
