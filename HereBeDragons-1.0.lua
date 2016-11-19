@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 28
+local MAJOR, MINOR = "HereBeDragons-1.0", 29
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -599,6 +599,7 @@ end
 function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level)
     local data = getMapDataTable(zone, level)
     if not data or data[0] == 0 or data[1] == 0 then return nil, nil, nil end
+    if not x or not y then return nil, nil, nil end
 
     local width, height, left, top = data[1], data[2], data[3], data[4]
     x, y = left - width * x, top - height * y
@@ -615,6 +616,7 @@ end
 function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, level, allowOutOfBounds)
     local data = getMapDataTable(zone, level)
     if not data or data[0] == 0 or data[1] == 0 then return nil, nil end
+    if not x or not y then return nil, nil end
 
     local width, height, left, top = data[1], data[2], data[3], data[4]
     x, y = (left - x) / width, (top - y) / height
@@ -651,6 +653,7 @@ end
 -- @param dY destination Y
 -- @return distance, deltaX, deltaY
 function HereBeDragons:GetWorldDistance(instanceID, oX, oY, dX, dY)
+    if not oX or not oY or not dX or not dY then return nil, nil, nil end
     local deltaX, deltaY = dX - oX, dY - oY
     return (deltaX * deltaX + deltaY * deltaY)^0.5, deltaX, deltaY
 end
