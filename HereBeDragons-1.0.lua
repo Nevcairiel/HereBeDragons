@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 29
+local MAJOR, MINOR = "HereBeDragons-1.0", 30
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -86,7 +86,7 @@ local function RestoreWMU()
 end
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion or oldversion < 26 then
+if not oldversion or oldversion < 30 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
@@ -111,6 +111,10 @@ if not oldversion or oldversion < 26 then
         -- main draenor garrison maps
         [971] = true,
         [976] = true,
+
+        -- legion class halls
+        [1072] = { Z = 10 }, -- true shot lodge
+        [1077] = { Z = 7  }, -- dreamgrove
     }
 
     local function processTransforms()
@@ -191,6 +195,13 @@ if not oldversion or oldversion < 26 then
         end
 
         local C, Z = GetCurrentMapContinent(), GetCurrentMapZone()
+
+        -- maps that remap generally have wrong C/Z info, so allow the fixup table to override it
+        if REMAP_FIXUP_EXEMPT[id] and type(REMAP_FIXUP_EXEMPT[id]) == "table" then
+            C = REMAP_FIXUP_EXEMPT[id].C or C
+            Z = REMAP_FIXUP_EXEMPT[id].Z or Z
+        end
+
         mapData[id].C = C or -100
         mapData[id].Z = Z or -100
 
