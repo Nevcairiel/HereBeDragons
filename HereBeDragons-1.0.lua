@@ -198,7 +198,7 @@ if not oldversion or oldversion < 30 then
         local C, Z = GetCurrentMapContinent(), GetCurrentMapZone()
 
         -- maps that remap generally have wrong C/Z info, so allow the fixup table to override it
-        if REMAP_FIXUP_EXEMPT[id] and type(REMAP_FIXUP_EXEMPT[id]) == "table" then
+        if type(REMAP_FIXUP_EXEMPT[id]) == "table" then
             C = REMAP_FIXUP_EXEMPT[id].C or C
             Z = REMAP_FIXUP_EXEMPT[id].Z or Z
         end
