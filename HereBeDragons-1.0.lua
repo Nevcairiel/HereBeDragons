@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-1.0", 31
+local MAJOR, MINOR = "HereBeDragons-1.0", 32
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -114,8 +114,8 @@ if not oldversion or oldversion < 30 then
         [976] = true,
 
         -- legion class halls
-        [1072] = { Z = 10 }, -- true shot lodge
-        [1077] = { Z = 7  }, -- dreamgrove
+        [1072] = { Z = 10, mapFile = "TrueshotLodge" }, -- true shot lodge
+        [1077] = { Z = 7,  mapFile = "TheDreamgrove" }, -- dreamgrove
     }
 
     local function processTransforms()
@@ -186,7 +186,7 @@ if not oldversion or oldversion < 30 then
         -- store the original instance id (ie. not remapped for map transforms) for micro dungeons
         mapData[id].originalInstance = originalInstanceID
 
-        local mapFile = GetMapInfo()
+        local mapFile = type(REMAP_FIXUP_EXEMPT[id]) == "table" and REMAP_FIXUP_EXEMPT[id].mapFile or GetMapInfo()
         if mapFile then
             -- remove phased terrain from the map names
             mapFile = mapFile:gsub(TERRAIN_MATCH, "")
