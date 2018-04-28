@@ -230,7 +230,7 @@ end
 -- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
 function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, allowOutOfBounds)
     local data = mapData[zone]
-    if not data or data[0] == 0 or data[1] == 0 then return nil, nil end
+    if not data or data[1] == 0 or data[2] == 0 then return nil, nil end
     if not x or not y then return nil, nil end
 
     local width, height, left, top = data[1], data[2], data[3], data[4]
@@ -355,7 +355,7 @@ end
 -- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
 -- @return x, y, uiMapID, mapType
 function HereBeDragons:GetPlayerZonePosition(allowOutOfBounds)
-    if not currentPlayerZoneMapID then return nil, nil, nil, nil end
+    if not currentPlayerUIMapID then return nil, nil, nil, nil end
     local x, y, instanceID = self:GetPlayerWorldPosition()
     if not x or not y then return nil, nil, nil, nil end
 
