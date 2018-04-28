@@ -18,6 +18,9 @@ HereBeDragons.eventFrame       = HereBeDragons.eventFrame or CreateFrame("Frame"
 HereBeDragons.mapData          = HereBeDragons.mapData or {}
 HereBeDragons.callbacks        = CBH:New(HereBeDragons, nil, nil, false)
 
+-- Data Constants
+local COSMIC_MAP_ID = 946
+
 -- Lua upvalues
 local PI2 = math.pi * 2
 local atan2 = math.atan2
@@ -30,7 +33,7 @@ local UnitPosition = UnitPosition
 local C_Map = C_Map
 
 -- data table upvalues
-local mapData          = HereBeDragons.mapData -- table { width, height, left, top }
+local mapData          = HereBeDragons.mapData -- table { width, height, left, top, .instance, .name, .mapType }
 
 local currentPlayerUIMapID, currentPlayerUIMapType
 
@@ -62,3 +65,47 @@ local instanceIDOverrides = {
     [1626] = 1220, -- Suramar Withered Scenario
     [1662] = 1220, -- Suramar Invasion Scenario
 }
+
+-- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
+if not oldversion or oldversion < 1 then
+    -- wipe old data, if required, otherwise the upgrade path isn't triggered
+    if oldversion then
+        wipe(mapData)
+    end
+
+    -- gather the data of one map (by UIMapID)
+    local function processMap(id, data)
+        if not id or mapData[id] then return end
+
+        mapData[id] = {0, 0, 0, 0, instance = -1, name = data.name, mapType = data.mapType}
+    end
+
+    local function processMapChildrenRecursive(id)
+        local children = C_Map.GetMapChildrenInfo(id)
+        if children and #children > 0 then
+            for i = 1, #children do
+                local id = children[i].mapID
+                if id and not mapData[id] then
+                    processMap(id, children[i])
+                    processMapChildrenRecursive(id)
+                end
+            end
+        end
+    end
+
+    local function fixupZones()
+        local cosmic = C_Map.GetMapInfo(COSMIC_MAP_ID)
+        mapData[COSMIC_MAP_ID] = {0, 0, 0, 0}
+        mapData[COSMIC_MAP_ID].instance = -1
+        mapData[COSMIC_MAP_ID].name = cosmic.name
+        mapData[COSMIC_MAP_ID].mapType = cosmic.mapType
+    end
+
+    local function gatherMapData()
+        processMapChildrenRecursive(COSMIC_MAP_ID)
+
+        fixupZones()
+    end
+
+    gatherMapData()
+end
