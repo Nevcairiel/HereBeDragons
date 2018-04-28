@@ -245,7 +245,7 @@ end
 -- @param zone uiMapID of the zone
 function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone)
     local data = mapData[zone]
-    if not data or data[0] == 0 or data[1] == 0 then return nil, nil, nil end
+    if not data or data[1] == 0 or data[2] == 0 then return nil, nil, nil end
     if not x or not y then return nil, nil, nil end
 
     local width, height, left, top = data[1], data[2], data[3], data[4]
