@@ -258,7 +258,7 @@ end
 -- @param x X position in 0-1 point coordinates
 -- @param y Y position in 0-1 point coordinates
 -- @param instance Instance to use for the world coordinates
-function HereBeDragons:GetWorldCoordinatesFromWorldMap(x, y, instance)
+function HereBeDragons:GetWorldCoordinatesFromAzerothWorldMap(x, y, instance)
     local data = worldMapData[instance]
     if not data or data[1] == 0 or data[2] == 0 then return nil, nil, nil end
     if not x or not y then return nil, nil, nil end
@@ -294,7 +294,7 @@ end
 -- @param y Global Y position
 -- @param instance Instance to translate coordinates from
 -- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
-function HereBeDragons:GetWorldMapCoordinatesFromWorld(x, y, instance, allowOutOfBounds)
+function HereBeDragons:GetAzerothWorldMapCoordinatesFromWorld(x, y, instance, allowOutOfBounds)
     local data = worldMapData[instance]
     if not data or data[1] == 0 or data[2] == 0 then return nil, nil end
     if not x or not y then return nil, nil end
@@ -309,7 +309,7 @@ function HereBeDragons:GetWorldMapCoordinatesFromWorld(x, y, instance, allowOutO
 end
 
 -- Helper function to handle world map coordinate translation
-local function TranslateWorldMapCoordinates(self, x, y, oZone, dZone, allowOutOfBounds)
+local function TranslateAzerothWorldMapCoordinates(self, x, y, oZone, dZone, allowOutOfBounds)
     if (oZone ~= WORLD_MAP_ID and not mapData[oZone]) or (dZone ~= WORLD_MAP_ID and not mapData[dZone]) then return nil, nil end
     -- determine the instance we're working with
     local instance = (oZone == WORLD_MAP_ID) and mapData[dZone].instance or mapData[oZone].instance
@@ -319,11 +319,11 @@ local function TranslateWorldMapCoordinates(self, x, y, oZone, dZone, allowOutOf
     local width, height, left, top = data[1], data[2], data[3], data[4]
 
     if oZone == WORLD_MAP_ID then
-        x, y = self:GetWorldCoordinatesFromWorldMap(x, y, instance)
+        x, y = self:GetWorldCoordinatesFromAzerothWorldMap(x, y, instance)
         return self:GetZoneCoordinatesFromWorld(x, y, dZone, allowOutOfBounds)
     else
         x, y = self:GetWorldCoordinatesFromZone(x, y, oZone)
-        return self:GetWorldMapCoordinatesFromWorld(x, y, instance, allowOutOfBounds)
+        return self:GetAzerothWorldMapCoordinatesFromWorld(x, y, instance, allowOutOfBounds)
     end
 end
 
@@ -337,7 +337,7 @@ function HereBeDragons:TranslateZoneCoordinates(x, y, oZone, dZone, allowOutOfBo
     if oZone == dZone then return x, y end
 
     if oZone == WORLD_MAP_ID or dZone == WORLD_MAP_ID then
-        return TranslateWorldMapCoordinates(self, x, y, oZone, dZone, allowOutOfBounds)
+        return TranslateAzerothWorldMapCoordinates(self, x, y, oZone, dZone, allowOutOfBounds)
     end
 
     local xCoord, yCoord, instance = self:GetWorldCoordinatesFromZone(x, y, oZone)
