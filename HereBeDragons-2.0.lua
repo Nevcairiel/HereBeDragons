@@ -2,7 +2,7 @@
 
 -- HereBeDragons-2.0 is not supported on WoW 7.x or earlier
 if select(4, GetBuildInfo()) < 80000 then
-	return
+    return
 end
 
 local MAJOR, MINOR = "HereBeDragons-2.0", 1
