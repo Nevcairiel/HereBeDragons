@@ -73,7 +73,7 @@ if not oldversion or oldversion < 1 then
         wipe(mapData)
     end
 
-    -- gather the data of one map (by UIMapID)
+    -- gather the data of one map (by uiMapID)
     local function processMap(id, data)
         if not id or mapData[id] then return end
 
@@ -345,7 +345,7 @@ end
 
 --- Get the current zone and level of the player
 -- The returned mapFile can represent a micro dungeon, if the player currently is inside one.
--- @return mapID, level, mapFile, isMicroDungeon
+-- @return uiMapID, mapType
 function HereBeDragons:GetPlayerZone()
     return currentPlayerUIMapID, currentPlayerUIMapType
 end
@@ -353,7 +353,7 @@ end
 --- Get the current position of the player on a zone level
 -- The returned values are local point coordinates, 0-1. The mapFile can represent a micro dungeon.
 -- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
--- @return x, y, mapID, level, mapFile, isMicroDungeon
+-- @return x, y, uiMapID, mapType
 function HereBeDragons:GetPlayerZonePosition(allowOutOfBounds)
     if not currentPlayerZoneMapID then return nil, nil, nil, nil end
     local x, y, instanceID = self:GetPlayerWorldPosition()
