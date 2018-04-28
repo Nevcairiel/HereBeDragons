@@ -21,7 +21,7 @@ HereBeDragons.mapToID          = HereBeDragons.mapToID or { Cosmic = WORLDMAP_CO
 HereBeDragons.microDungeons    = HereBeDragons.microDungeons or {}
 HereBeDragons.transforms       = HereBeDragons.transforms or {}
 
-HereBeDragons.callbacks        = CBH:New(HereBeDragons, nil, nil, false)
+HereBeDragons.callbacks        = HereBeDragons.callbacks or CBH:New(HereBeDragons, nil, nil, false)
 
 -- constants
 local TERRAIN_MATCH = "_terrain%d+$"

@@ -16,7 +16,7 @@ local CBH = LibStub("CallbackHandler-1.0")
 HereBeDragons.eventFrame       = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData          = HereBeDragons.mapData or {}
-HereBeDragons.callbacks        = CBH:New(HereBeDragons, nil, nil, false)
+HereBeDragons.callbacks        = HereBeDragons.callbacks or CBH:New(HereBeDragons, nil, nil, false)
 
 -- Data Constants
 local COSMIC_MAP_ID = 946
