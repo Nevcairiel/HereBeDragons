@@ -16,10 +16,12 @@ local CBH = LibStub("CallbackHandler-1.0")
 HereBeDragons.eventFrame       = HereBeDragons.eventFrame or CreateFrame("Frame")
 
 HereBeDragons.mapData          = HereBeDragons.mapData or {}
+HereBeDragons.worldMapData     = HereBeDragons.worldMapData or {}
 HereBeDragons.callbacks        = HereBeDragons.callbacks or CBH:New(HereBeDragons, nil, nil, false)
 
 -- Data Constants
 local COSMIC_MAP_ID = 946
+local WORLD_MAP_ID = 947
 
 -- Lua upvalues
 local PI2 = math.pi * 2
@@ -34,6 +36,7 @@ local C_Map = C_Map
 
 -- data table upvalues
 local mapData          = HereBeDragons.mapData -- table { width, height, left, top, .instance, .name, .mapType }
+local worldMapData     = HereBeDragons.worldMapData -- table { width, height, left, top }
 
 local currentPlayerUIMapID, currentPlayerUIMapType
 
@@ -71,6 +74,7 @@ if not oldversion or oldversion < 1 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
+        wipe(worldMapData)
     end
 
     -- map data exported from UIMapAssignment.db2 until API is made available
@@ -117,6 +121,15 @@ if not oldversion or oldversion < 1 then
         mapData[COSMIC_MAP_ID].instance = -1
         mapData[COSMIC_MAP_ID].name = cosmic.name
         mapData[COSMIC_MAP_ID].mapType = cosmic.mapType
+
+        -- data for the azeroth world map
+        worldMapData[0] = { 62265.29, 41508.24, 53684.04, 19228.04 }
+        worldMapData[1] = { 62984, 41980.74, 11291.79, 22778.68 }
+        worldMapData[571] = { 57793.83, 39996.64, 29422.39, 11586.76 }
+        worldMapData[870] = { 56437.39, 37624.93, 28066.28, 33175.82 }
+        worldMapData[1220] = { 82098.05, 54732.04, 54211.17, 25798.86 }
+        worldMapData[1642] = { 84076.07, 56079.41, 49045.94, 36813.6 }
+        worldMapData[1643] = { 75160.1, 50106.35, 55118.2, 25161.42 }
     end
 
     local function gatherMapData()
@@ -241,6 +254,22 @@ function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone)
     return x, y, data.instance
 end
 
+--- Convert local/point coordinates to world coordinates in yards. The coordinates have to come from the Azeroth World Map
+-- @param x X position in 0-1 point coordinates
+-- @param y Y position in 0-1 point coordinates
+-- @param instance Instance to use for the world coordinates
+function HereBeDragons:GetWorldCoordinatesFromWorldMap(x, y, instance)
+    local data = worldMapData[instance]
+    if not data or data[1] == 0 or data[2] == 0 then return nil, nil, nil end
+    if not x or not y then return nil, nil, nil end
+
+    local width, height, left, top = data[1], data[2], data[3], data[4]
+    x, y = left - width * x, top - height * y
+
+    return x, y, instance
+end
+
+
 --- Convert world coordinates to local/point zone coordinates
 -- @param x Global X position
 -- @param y Global Y position
@@ -260,6 +289,44 @@ function HereBeDragons:GetZoneCoordinatesFromWorld(x, y, zone, allowOutOfBounds)
     return x, y
 end
 
+--- Convert world coordinates to local/point zone coordinates on the azeroth world map
+-- @param x Global X position
+-- @param y Global Y position
+-- @param instance Instance to translate coordinates from
+-- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
+function HereBeDragons:GetWorldMapCoordinatesFromWorld(x, y, instance, allowOutOfBounds)
+    local data = worldMapData[instance]
+    if not data or data[1] == 0 or data[2] == 0 then return nil, nil end
+    if not x or not y then return nil, nil end
+
+    local width, height, left, top = data[1], data[2], data[3], data[4]
+    x, y = (left - x) / width, (top - y) / height
+
+    -- verify the coordinates fall into the zone
+    if not allowOutOfBounds and (x < 0 or x > 1 or y < 0 or y > 1) then return nil, nil end
+
+    return x, y
+end
+
+-- Helper function to handle world map coordinate translation
+local function TranslateWorldMapCoordinates(self, x, y, oZone, dZone, allowOutOfBounds)
+    if (oZone ~= WORLD_MAP_ID and not mapData[oZone]) or (dZone ~= WORLD_MAP_ID and not mapData[dZone]) then return nil, nil end
+    -- determine the instance we're working with
+    local instance = (oZone == WORLD_MAP_ID) and mapData[dZone].instance or mapData[oZone].instance
+    if not worldMapData[instance] then return nil, nil end
+
+    local data = worldMapData[instance]
+    local width, height, left, top = data[1], data[2], data[3], data[4]
+
+    if oZone == WORLD_MAP_ID then
+        x, y = self:GetWorldCoordinatesFromWorldMap(x, y, instance)
+        return self:GetZoneCoordinatesFromWorld(x, y, dZone, allowOutOfBounds)
+    else
+        x, y = self:GetWorldCoordinatesFromZone(x, y, oZone)
+        return self:GetWorldMapCoordinatesFromWorld(x, y, instance, allowOutOfBounds)
+    end
+end
+
 --- Translate zone coordinates from one zone to another
 -- @param x X position in 0-1 point coordinates, relative to the origin zone
 -- @param y Y position in 0-1 point coordinates, relative to the origin zone
@@ -267,6 +334,12 @@ end
 -- @param dZone Destination Zone, uiMapID
 -- @param allowOutOfBounds Allow coordinates to go beyond the current map (ie. outside of the 0-1 range), otherwise nil will be returned
 function HereBeDragons:TranslateZoneCoordinates(x, y, oZone, dZone, allowOutOfBounds)
+    if oZone == dZone then return x, y end
+
+    if oZone == WORLD_MAP_ID or dZone == WORLD_MAP_ID then
+        return TranslateWorldMapCoordinates(self, x, y, oZone, dZone, allowOutOfBounds)
+    end
+
     local xCoord, yCoord, instance = self:GetWorldCoordinatesFromZone(x, y, oZone)
     if not xCoord then return nil, nil end
 
