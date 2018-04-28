@@ -1,5 +1,10 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
+-- HereBeDragons-1.0 is not supported on WoW 8.0
+if select(4, GetBuildInfo()) >= 80000 then
+	return
+end
+
 local MAJOR, MINOR = "HereBeDragons-1.0", 33
 assert(LibStub, MAJOR .. " requires LibStub")
 
