@@ -11,5 +11,9 @@
 LibStub\LibStub.lua
 CallbackHandler-1.0\CallbackHandler-1.0.lua
 
+# WoW 7.x version
 HereBeDragons-1.0.lua
 HereBeDragons-Pins-1.0.lua
+
+# WoW 8.0+ version
+HereBeDragons-2.0.lua
