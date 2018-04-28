@@ -109,3 +109,57 @@ if not oldversion or oldversion < 1 then
 
     gatherMapData()
 end
+
+local StartUpdateTimer
+local function UpdateCurrentPosition()
+    -- retrieve current zone
+    local uiMapID = C_Map.GetBestMapForUnit("player")
+
+    if uiMapID ~= currentPlayerUIMapID then
+        -- update upvalues and signal callback
+        currentPlayerUIMapID, currentPlayerUIMapType = uiMapID, mapData[uiMapID] and mapData[uiMapID].mapType or 0
+        HereBeDragons.callbacks:Fire("PlayerZoneChanged", currentPlayerUIMapID, currentPlayerUIMapType)
+    end
+
+    -- start a timer to update in micro dungeons since multi-level micro dungeons do not reliably fire events
+    if currentPlayerUIMapType == Enum.UIMapType.Micro then
+        StartUpdateTimer()
+    end
+end
+
+-- upgradeable timer callback, don't want to keep calling the old function if the library is upgraded
+HereBeDragons.UpdateCurrentPosition = UpdateCurrentPosition
+local function UpdateTimerCallback()
+    -- signal that the timer ran
+    HereBeDragons.updateTimerActive = nil
+
+    -- run update now
+    HereBeDragons.UpdateCurrentPosition()
+end
+
+function StartUpdateTimer()
+    if not HereBeDragons.updateTimerActive then
+        -- prevent running multiple timers
+        HereBeDragons.updateTimerActive = true
+
+        -- and queue an update
+        C_Timer.After(1, UpdateTimerCallback)
+    end
+end
+
+local function OnEvent(frame, event, ...)
+    UpdateCurrentPosition()
+end
+
+HereBeDragons.eventFrame:SetScript("OnEvent", OnEvent)
+HereBeDragons.eventFrame:UnregisterAllEvents()
+HereBeDragons.eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+HereBeDragons.eventFrame:RegisterEvent("ZONE_CHANGED")
+HereBeDragons.eventFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
+HereBeDragons.eventFrame:RegisterEvent("NEW_WMO_CHUNK")
+HereBeDragons.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+-- if we're loading after entering the world (ie. on demand), update position now
+if IsLoggedIn() then
+    UpdateCurrentPosition()
+end
