@@ -33,3 +33,32 @@ local C_Map = C_Map
 local mapData          = HereBeDragons.mapData -- table { width, height, left, top }
 
 local currentPlayerUIMapID, currentPlayerUIMapType
+
+-- Override instance ids for phased content
+local instanceIDOverrides = {
+    -- Draenor
+    [1152] = 1116, -- Horde Garrison 1
+    [1330] = 1116, -- Horde Garrison 2
+    [1153] = 1116, -- Horde Garrison 3
+    [1154] = 1116, -- Horde Garrison 4 (unused)
+    [1158] = 1116, -- Alliance Garrison 1
+    [1331] = 1116, -- Alliance Garrison 2
+    [1159] = 1116, -- Alliance Garrison 3
+    [1160] = 1116, -- Alliance Garrison 4 (unused)
+    [1191] = 1116, -- Ashran PvP Zone
+    [1203] = 1116, -- Frostfire Finale Scenario
+    [1207] = 1116, -- Talador Finale Scenario
+    [1277] = 1116, -- Defense of Karabor Scenario (SMV)
+    [1402] = 1116, -- Gorgrond Finale Scenario
+    [1464] = 1116, -- Tanaan
+    [1465] = 1116, -- Tanaan
+    -- Legion
+    [1478] = 1220, -- Temple of Elune Scenario (Val'Sharah)
+    [1495] = 1220, -- Protection Paladin Artifact Scenario (Stormheim)
+    [1498] = 1220, -- Havoc Demon Hunter Artifact Scenario (Suramar)
+    [1502] = 1220, -- Dalaran Underbelly
+    [1533] = 0,    -- Karazhan Artifact Scenario
+    [1612] = 1220, -- Feral Druid Artifact Scenario (Suramar)
+    [1626] = 1220, -- Suramar Withered Scenario
+    [1662] = 1220, -- Suramar Invasion Scenario
+}
