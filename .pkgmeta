@@ -1,6 +1,9 @@
-package-as: HereBeDragons-1.0
+package-as: HereBeDragons
 
 enable-nolib-creation: no
+
+move-folders:
+  HereBeDragons/1.0-compat: HereBeDragons-1.0
 
 externals:
    LibStub: svn://svn.wowace.com/wow/libstub/mainline/tags/1.0
