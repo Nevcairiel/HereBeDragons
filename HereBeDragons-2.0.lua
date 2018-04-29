@@ -80,13 +80,22 @@ if not oldversion or oldversion < 1 then
         wipe(transforms)
     end
 
+    -- map transform data extracted from UIMapAssignment.db2 (see HereBeDragons-Scripts on GitHub)
+    -- format: instanceID, newInstanceID, minY, maxY, minX, maxX, offsetY, offsetX
+    local transformData = {
+        { 530, 1, -6933.33, 533.33, -16000, -8000, 10133.3, 17600 },
+        { 530, 0, 4800, 16000, -10133.3, -2666.67, -2400, 2400 },
+        { 732, 0, -20000, 20000, -20000, 20000, -1600, 2800 },
+        { 1064, 870, 5391, 8148, 3518, 7655, -2134.2, -2286.6 },
+        { 1208, 1116, -2666, -2133, -2133, -1600, 10210, 2410 },
+        { 1460, 1220, -1066.7, 2133.3, 0, 3200, -2333.9, 966.7 },
+    }
+
     local function processTransforms()
-        table.insert(transforms, { instanceID = 530, newInstanceID = 0, minY = 4800, maxY = 16000, minX = -10133.333, maxX = -2666.6667, offsetY = -2400, offsetX = 2400 })
-        table.insert(transforms, { instanceID = 530, newInstanceID = 1, minY = -6933.3334, maxY = 533.3333, minX = -16000, maxX = -8000, offsetY = 10133.333, offsetX = 17600 })
-        table.insert(transforms, { instanceID = 732, newInstanceID = 0, minY = -20000, maxY = 20000, minX = -20000, maxX = 20000, offsetY = -1600, offsetX = 2800 })
-        table.insert(transforms, { instanceID = 1064, newInstanceID = 870, minY = 5391, maxY = 8148, minX = 3518, maxX = 7655, offsetY = -844, offsetX = 549 })
-        table.insert(transforms, { instanceID = 1208, newInstanceID = 1116, minY = -2666, maxY = -2133, minX = -2133, maxX = -1600, offsetY = 10210, offsetX = 2410 })
-        table.insert(transforms, { instanceID = 1460, newInstanceID = 1220, minY = -1066.7, maxY = 2133.3, minX = 0, maxX = 3200, offsetY = -2333.889, offsetX = 966.67 })
+        for _, transform in pairs(transformData) do
+            local instanceID, newInstanceID, minY, maxY, minX, maxX, offsetY, offsetX = unpack(transform)
+            table.insert(transforms, { instanceID = instanceID, newInstanceID = newInstanceID, minY = minY, maxY = maxY, minX = minX, maxX = maxX, offsetY = offsetY, offsetX = offsetX })
+        end
     end
 
     local function applyMapTransforms(instanceID, left, right, top, bottom)
