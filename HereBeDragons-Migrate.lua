@@ -24,6 +24,8 @@ function HBDMigrate:GetUIMapIDFromMapAreaId(mapId, floor)
     if not floor then
         if data[0] then
             floor = 0
+        elseif data.defaultFloor then
+            floor = data.defaultFloor
         else
             for i = 1, 50 do
                 if data[i] then
@@ -31,6 +33,7 @@ function HBDMigrate:GetUIMapIDFromMapAreaId(mapId, floor)
                     break
                 end
             end
+            data.defaultFloor = floor
         end
     end
     return data[floor]
@@ -517,7 +520,7 @@ function SetupMigrationData()
     uiMapIdToIdMap = {}
     for id, t in pairs(MapMigrationData) do
         for floor, uiMapId in pairs(t) do
-            if floor ~= "mapFile" then
+            if floor ~= "mapFile" and floor ~= "defaultFloor" then
                 uiMapIdToIdMap[uiMapId] = id * 10000 + floor
             end
         end
