@@ -17,6 +17,7 @@ HereBeDragons.eventFrame       = HereBeDragons.eventFrame or CreateFrame("Frame"
 
 HereBeDragons.mapData          = HereBeDragons.mapData or {}
 HereBeDragons.worldMapData     = HereBeDragons.worldMapData or {}
+HereBeDragons.transforms       = HereBeDragons.transforms or {}
 HereBeDragons.callbacks        = HereBeDragons.callbacks or CBH:New(HereBeDragons, nil, nil, false)
 
 -- Data Constants
@@ -37,6 +38,7 @@ local C_Map = C_Map
 -- data table upvalues
 local mapData          = HereBeDragons.mapData -- table { width, height, left, top, .instance, .name, .mapType }
 local worldMapData     = HereBeDragons.worldMapData -- table { width, height, left, top }
+local transforms       = HereBeDragons.transforms
 
 local currentPlayerUIMapID, currentPlayerUIMapType
 
@@ -75,6 +77,32 @@ if not oldversion or oldversion < 1 then
     if oldversion then
         wipe(mapData)
         wipe(worldMapData)
+        wipe(transforms)
+    end
+
+    local function processTransforms()
+        table.insert(transforms, { instanceID = 530, newInstanceID = 0, minY = 4800, maxY = 16000, minX = -10133.333, maxX = -2666.6667, offsetY = -2400, offsetX = 2400 })
+        table.insert(transforms, { instanceID = 530, newInstanceID = 1, minY = -6933.3334, maxY = 533.3333, minX = -16000, maxX = -8000, offsetY = 10133.333, offsetX = 17600 })
+        table.insert(transforms, { instanceID = 732, newInstanceID = 0, minY = -20000, maxY = 20000, minX = -20000, maxX = 20000, offsetY = -1600, offsetX = 2800 })
+        table.insert(transforms, { instanceID = 1064, newInstanceID = 870, minY = 5391, maxY = 8148, minX = 3518, maxX = 7655, offsetY = -844, offsetX = 549 })
+        table.insert(transforms, { instanceID = 1208, newInstanceID = 1116, minY = -2666, maxY = -2133, minX = -2133, maxX = -1600, offsetY = 10210, offsetX = 2410 })
+        table.insert(transforms, { instanceID = 1460, newInstanceID = 1220, minY = -1066.7, maxY = 2133.3, minX = 0, maxX = 3200, offsetY = -2333.889, offsetX = 966.67 })
+    end
+
+    local function applyMapTransforms(instanceID, left, right, top, bottom)
+        for _, transformData in ipairs(transforms) do
+            if transformData.instanceID == instanceID then
+                if left <= transformData.maxX and right >= transformData.minX and top <= transformData.maxY and bottom >= transformData.minY then
+                    instanceID = transformData.newInstanceID
+                    left   = left   + transformData.offsetX
+                    right  = right  + transformData.offsetX
+                    top    = top    + transformData.offsetY
+                    bottom = bottom + transformData.offsetY
+                    break
+                end
+            end
+        end
+        return instanceID, left, right, top, bottom
     end
 
     -- map data exported from UIMapAssignment.db2 until API is made available
@@ -87,16 +115,17 @@ if not oldversion or oldversion < 1 then
 
         if db2MapData[id] then
             mapData[id] = db2MapData[id]
-            mapData[id].instance = mapData[id][1]
             mapData[id].name = data.name
             mapData[id].mapType = data.mapType
 
-            local bottom, right, top, left = mapData[id][2], mapData[id][3], mapData[id][4], mapData[id][5]
+            local instance, bottom, right, top, left = mapData[id][1], mapData[id][2], mapData[id][3], mapData[id][4], mapData[id][5]
+            instance, left, right, top, bottom = applyMapTransforms(instance, left, right, top, bottom)
             mapData[id][1] = left - right
             mapData[id][2] = top - bottom
             mapData[id][3] = left
             mapData[id][4] = top
             mapData[id][5] = nil
+            mapData[id].instance = instance
         else
             mapData[id] = {0, 0, 0, 0, instance = -1, name = data.name, mapType = data.mapType}
         end
@@ -133,6 +162,8 @@ if not oldversion or oldversion < 1 then
     end
 
     local function gatherMapData()
+        processTransforms()
+
         processMapChildrenRecursive(COSMIC_MAP_ID)
 
         fixupZones()
@@ -143,7 +174,7 @@ end
 
 -- Transform a set of coordinates based on the defined map transformations
 local function applyCoordinateTransforms(x, y, instanceID)
-    --[[for _, transformData in ipairs(transforms) do
+    for _, transformData in ipairs(transforms) do
         if transformData.instanceID == instanceID then
             if transformData.minX <= x and transformData.maxX >= x and transformData.minY <= y and transformData.maxY >= y then
                 instanceID = transformData.newInstanceID
@@ -152,7 +183,7 @@ local function applyCoordinateTransforms(x, y, instanceID)
                 break
             end
         end
-    end]]
+    end
     if instanceIDOverrides[instanceID] then
         instanceID = instanceIDOverrides[instanceID]
     end
