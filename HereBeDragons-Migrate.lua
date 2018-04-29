@@ -46,25 +46,17 @@ function HBDMigrate:GetUIMapIDFromMapFile(mapFile, floor)
     return self:GetUIMapIDFromMapAreaId(mapFileToIdMap[mapFile], floor)
 end
 
---- Return the mapAreaId/floor for the specified uiMapId
+--- Return the legacy map information for the specified uiMapId
 -- @param uiMapId uiMapId to lookup
--- @return mapAreaId, floor
-function HBDMigrate:GetMapAreaIdFromUIMapID(uiMapId)
+-- @return mapAreaId, floor, mapFile
+function HBDMigrate:GetLegacyMapInfo(uiMapId)
     if not uiMapId then return nil end
     if not uiMapIdToIdMap then SetupMigrationData() end
     local c = uiMapIdToIdMap[uiMapId]
     if not c then return end
     
-    return floor(c / 10000), (c % 10000)
-end
-
---- Return the mapFile for the specified uiMapId
--- @param uiMapId uiMapId to lookup
--- @return mapFile
-function HBDMigrate:GetMapFileFromUIMapID(uiMapId)
-    local m = self:GetMapAreaIdFromUIMapID(uiMapId)
-    if not m or not MapMigrationData[m] then return end
-    return MapMigrationData[m].mapFile
+    local m, f = floor(c / 10000), (c % 10000)
+    return m, f, MapMigrationData[m].mapFile
 end
 
 MapMigrationData = {
