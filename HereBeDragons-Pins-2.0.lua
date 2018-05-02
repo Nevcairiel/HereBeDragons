@@ -23,6 +23,9 @@ pins.minimapPinRegistry   = pins.minimapPinRegistry or {}
 -- and worldmap pins
 pins.worldmapPins         = pins.worldmapPins or {}
 pins.worldmapPinRegistry  = pins.worldmapPinRegistry or {}
+pins.worldmapPinsPool     = pins.worldmapPinsPool or CreateFramePool("FRAME")
+pins.worldmapProvider     = pins.worldmapProvider or CreateFromMixins(MapCanvasDataProviderMixin)
+pins.worldmapProviderPin  = pins.worldmapProviderPin or CreateFromMixins(MapCanvasPinMixin)
 
 -- store a reference to the active minimap object
 pins.Minimap = pins.Minimap or Minimap
@@ -41,6 +44,9 @@ local minimapPinRegistry  = pins.minimapPinRegistry
 
 local worldmapPins        = pins.worldmapPins
 local worldmapPinRegistry = pins.worldmapPinRegistry
+local worldmapPinsPool    = pins.worldmapPinsPool
+local worldmapProvider    = pins.worldmapProvider
+local worldmapProviderPin = pins.worldmapProviderPin
 
 local minimap_size = {
     indoor = {
@@ -94,6 +100,9 @@ local function recycle(t)
     tableCache[t] = true
 end
 
+-------------------------------------------------------------------------------------------
+-- Minimap pin position logic
+
 -- minimap rotation
 local rotateMinimap = GetCVar("rotateMinimap") == "1"
 
@@ -103,9 +112,6 @@ local indoors = GetCVar("minimapZoom")+0 == pins.Minimap:GetZoom() and "outdoor"
 local minimapPinCount, queueFullUpdate = 0, false
 local minimapScale, minimapShape, mapRadius, minimapWidth, minimapHeight, mapSin, mapCos
 local lastZoom, lastFacing, lastXY, lastYY
-
--- TODO: worldmap
---local worldmapWidth, worldmapHeight = WorldMapButton:GetWidth(), WorldMapButton:GetHeight()
 
 local function drawMinimapPin(pin, data)
     local xDist, yDist = lastXY - data.x, lastYY - data.y
@@ -297,61 +303,134 @@ local function UpdateMinimapZoom()
     pins.Minimap:SetZoom(zoom)
 end
 
-local function PositionWorldMapIcon(icon, data, currentMapID)
-    -- special handling for the azeroth world map
-    local x, y
-    if currentMapID == WORLDMAP_AZEROTH_ID then
-        x, y = HBD:GetAzerothWorldMapCoordinatesFromWorld(data.x, data.y, data.instanceID)
-    else
-        x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, currentMapID)
-    end
+-------------------------------------------------------------------------------------------
+-- WorldMap data provider
 
-    -- TODO: worldmap
-    if x and y then
-        icon:ClearAllPoints()
-        --icon:SetPoint("CENTER", WorldMapButton, "TOPLEFT", x * worldmapWidth, -y * worldmapHeight)
-        icon:Show()
-    else
-        icon:Hide()
+-- setup pin pool
+worldmapPinsPool.parent = TestWorldMapFrame:GetCanvas()
+worldmapPinsPool.creationFunc = function(framePool)
+    local frame = CreateFrame(framePool.frameType, nil, framePool.parent)
+    frame:SetSize(1, 1)
+    return Mixin(frame, worldmapProviderPin)
+end
+
+-- register pin pool with the world map
+TestWorldMapFrame.pinPools["HereBeDragonsPinsTemplate"] = worldmapPinsPool
+
+-- provider base API
+function worldmapProvider:RemoveAllData()
+    self:GetMap():RemoveAllPinsByTemplate("HereBeDragonsPinsTemplate")
+end
+
+function worldmapProvider:RemovePinByIcon(icon)
+    for pin in self:GetMap():EnumeratePinsByTemplate("HereBeDragonsPinsTemplate") do
+        if pin.icon == icon then
+            self:GetMap():RemovePin(pin)
+        end
     end
 end
 
-local function GetWorldMapLocation()
-    return C_Map.GetCurrentMapID()
+function worldmapProvider:RemovePinsByRef(ref)
+    for pin in self:GetMap():EnumeratePinsByTemplate("HereBeDragonsPinsTemplate") do
+        if pin.icon and worldmapPinRegistry[ref][pin.icon] then
+            self:GetMap():RemovePin(pin)
+        end
+    end
+end
+
+function worldmapProvider:RefreshAllData(fromOnShow)
+    self:RemoveAllData()
+
+    for icon, data in pairs(worldmapPins) do
+        self:HandlePin(icon, data)
+    end
+end
+
+function worldmapProvider:HandlePin(icon, data)
+    local uiMapID = self:GetMap():GetMapID()
+
+    -- check for a valid map
+    if not uiMapID then return end
+
+    local x, y
+    if uiMapID == WORLDMAP_AZEROTH_ID then
+        -- should this pin show on the world map?
+        if uiMapID ~= data.uiMapID and data.worldMapShowFlag ~= HBD_PINS_WORLDMAP_SHOW_WORLD then return end
+
+        -- translate to the world map
+        x, y = HBD:GetAzerothWorldMapCoordinatesFromWorld(data.x, data.y, data.instanceID)
+    else
+        -- check that it matches the instance
+        if not HBD.mapData[uiMapID] or HBD.mapData[uiMapID].instance ~= data.instanceID then return end
+
+        if uiMapID ~= data.uiMapID then
+            local mapType = HBD.mapData[uiMapID].mapType
+            if not data.uiMapID then
+                if mapType == Enum.UIMapType.Continent and data.worldMapShowFlag == HBD_PINS_WORLDMAP_SHOW_CONTINENT then
+                    --pass
+                elseif mapType ~= Enum.UIMapType.Zone and mapType ~= Enum.UIMapType.Dungeon and mapType ~= Enum.UIMapType.Micro then
+                    -- fail
+                    return
+                end
+            else
+                local show = false
+                local info = C_Map.GetMapInfo(data.uiMapID)
+                while info and info.parentMapID do
+                    if info.parentMapID == uiMapID then
+                        local mapType = HBD.mapData[info.parentMapID].mapType
+                        -- show on any parent zones if they are normal zones
+                        if data.worldMapShowFlag >= HBD_PINS_WORLDMAP_SHOW_PARENT and
+                            (mapType == Enum.UIMapType.Zone or mapType == Enum.UIMapType.Dungeon or mapType == Enum.UIMapType.Micro) then
+                            show = true
+                        -- show on the continent
+                        elseif data.worldMapShowFlag >= HBD_PINS_WORLDMAP_SHOW_CONTINENT and
+                            mapType == Enum.UIMapType.Continent then
+                            show = true
+                        end
+                        break
+                        -- worldmap is handled above already
+                    else
+                        info = C_Map.GetMapInfo(info.parentMapID)
+                    end
+                end
+
+                if not show then return end
+            end
+        end
+
+        -- translate coordinates
+        x, y = HBD:GetZoneCoordinatesFromWorld(data.x, data.y, uiMapID)
+    end
+    if x and y then
+        self:GetMap():AcquirePin("HereBeDragonsPinsTemplate", icon, x, y)
+    end
+end
+
+--  map pin base API
+function worldmapProviderPin:OnLoad()
+    self:UseFrameLevelType("PIN_FRAME_LEVEL_AREA_POI")
+end
+
+function worldmapProviderPin:OnAcquired(icon, x, y)
+    self:SetPosition(x, y)
+
+    self.icon = icon
+    icon:SetParent(self)
+    icon:ClearAllPoints()
+    icon:SetPoint("CENTER", self, "CENTER")
+end
+
+-- register with the world map
+TestWorldMapFrame:AddDataProvider(worldmapProvider)
+
+-- map event handling
+local function UpdateMinimap()
+    UpdateMinimapZoom()
+    UpdateMinimapPins()
 end
 
 local function UpdateWorldMap()
-    if false --[[not WorldMapButton:IsVisible()]] then return end
-
-    local uiMapID = GetWorldMapLocation()
-
-    -- not viewing a valid map
-    if not uiMapID or uiMapID == -1 then
-        for icon in pairs(worldmapPins) do
-            icon:Hide()
-        end
-        return
-    end
-
-    local instanceID = HBD.mapData[uiMapID] and HBD.mapData[uiMapID].instance or -1
-
-    -- TODO: worldmap
-    worldmapWidth  = WorldMapButton:GetWidth()
-    worldmapHeight = WorldMapButton:GetHeight()
-
-    for icon, data in pairs(worldmapPins) do
-        if (instanceID == data.instanceID or mapID == WORLDMAP_AZEROTH_ID) and (not data.floor or (data.floor == mapFloor and (data.floor == 0 or data.mapID == mapID))) then
-            PositionWorldMapIcon(icon, data, mapID, mapFloor)
-        else
-            icon:Hide()
-        end
-    end
-end
-
-local function UpdateMaps()
-    UpdateMinimapZoom()
-    UpdateMinimapPins()
-    UpdateWorldMap()
+    worldmapProvider:RefreshAllData()
 end
 
 local last_update = 0
@@ -375,14 +454,12 @@ local function OnEventHandler(frame, event, ...)
             queueFullUpdate = true
         end
     elseif event == "MINIMAP_UPDATE_ZOOM" then
-        UpdateMinimapZoom()
-        UpdateMinimapPins()
+        UpdateMinimap()
     elseif event == "PLAYER_LOGIN" then
         -- recheck cvars after login
         rotateMinimap = GetCVar("rotateMinimap") == "1"
     elseif event == "PLAYER_ENTERING_WORLD" then
-        UpdateMaps()
-    elseif event == "WORLD_MAP_UPDATE" then
+        UpdateMinimap()
         UpdateWorldMap()
     end
 end
@@ -395,7 +472,7 @@ pins.updateFrame:RegisterEvent("PLAYER_LOGIN")
 pins.updateFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 pins.updateFrame:RegisterEvent("WORLD_MAP_UPDATE")
 
-HBD.RegisterCallback(pins, "PlayerZoneChanged", UpdateMaps)
+HBD.RegisterCallback(pins, "PlayerZoneChanged", UpdateMinimap)
 
 
 --- Add a icon to the minimap (x/y world coordinate version)
@@ -553,18 +630,11 @@ function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y, showFlag)
     t.x = x
     t.y = y
     t.uiMapID = nil
-    t.worldMapShowFlag = showFlag
+    t.worldMapShowFlag = showFlag or 0
 
     worldmapPins[icon] = t
 
-    --[[if WorldMapButton:IsVisible() then
-        local currentMapID, currentMapFloor = GetWorldMapLocation()
-        if currentMapID and HBD.mapData[currentMapID] and (HBD.mapData[currentMapID].instance == instanceID or currentMapID == WORLDMAP_AZEROTH_ID) then
-            PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
-        else
-            icon:Hide()
-        end
-    end]]
+    worldmapProvider:HandlePin(icon, t)
 end
 
 --- Add a icon to the world map (uiMapID zone coordinate version)
@@ -600,20 +670,11 @@ function pins:AddWorldMapIconMap(ref, icon, uiMapID, x, y, showFlag)
     t.x = xCoord
     t.y = yCoord
     t.uiMapID = uiMapID
-    t.worldMapShowFlag = showFlag
+    t.worldMapShowFlag = showFlag or 0
 
     worldmapPins[icon] = t
 
-    --[[if WorldMapButton:IsVisible() then
-        local currentMapID, currentMapFloor = GetWorldMapLocation()
-        if currentMapID and HBD.mapData[currentMapID] and (HBD.mapData[currentMapID].instance == instanceID or currentMapID == WORLDMAP_AZEROTH_ID)
-           and (not mapFloor or (currentMapFloor == mapFloor and (mapFloor == 0 or currentMapID == mapID))) then
-            PositionWorldMapIcon(icon, t, currentMapID, currentMapFloor)
-        else
-            icon:Hide()
-        end
-    end
-    ]]
+    worldmapProvider:HandlePin(icon, t)
 end
 
 --- Remove a worldmap icon
@@ -626,7 +687,7 @@ function pins:RemoveWorldMapIcon(ref, icon)
         recycle(worldmapPins[icon])
         worldmapPins[icon] = nil
     end
-    icon:Hide()
+    worldmapProvider:RemovePinByIcon(icon)
 end
 
 --- Remove all worldmap icons belonging to your addon (as tracked by "ref")
@@ -636,8 +697,8 @@ function pins:RemoveAllWorldMapIcons(ref)
     for icon in pairs(worldmapPinRegistry[ref]) do
         recycle(worldmapPins[icon])
         worldmapPins[icon] = nil
-        icon:Hide()
     end
+    worldmapProvider:RemovePinsByRef(ref)
     wipe(worldmapPinRegistry[ref])
 end
 
