@@ -307,7 +307,7 @@ end
 -- WorldMap data provider
 
 -- setup pin pool
-worldmapPinsPool.parent = TestWorldMapFrame:GetCanvas()
+worldmapPinsPool.parent = WorldMapFrame:GetCanvas()
 worldmapPinsPool.creationFunc = function(framePool)
     local frame = CreateFrame(framePool.frameType, nil, framePool.parent)
     frame:SetSize(1, 1)
@@ -315,7 +315,7 @@ worldmapPinsPool.creationFunc = function(framePool)
 end
 
 -- register pin pool with the world map
-TestWorldMapFrame.pinPools["HereBeDragonsPinsTemplate"] = worldmapPinsPool
+WorldMapFrame.pinPools["HereBeDragonsPinsTemplate"] = worldmapPinsPool
 
 -- provider base API
 function worldmapProvider:RemoveAllData()
@@ -421,7 +421,7 @@ function worldmapProviderPin:OnAcquired(icon, x, y)
 end
 
 -- register with the world map
-TestWorldMapFrame:AddDataProvider(worldmapProvider)
+WorldMapFrame:AddDataProvider(worldmapProvider)
 
 -- map event handling
 local function UpdateMinimap()
