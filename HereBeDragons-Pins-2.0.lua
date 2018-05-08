@@ -470,7 +470,6 @@ pins.updateFrame:RegisterEvent("CVAR_UPDATE")
 pins.updateFrame:RegisterEvent("MINIMAP_UPDATE_ZOOM")
 pins.updateFrame:RegisterEvent("PLAYER_LOGIN")
 pins.updateFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-pins.updateFrame:RegisterEvent("WORLD_MAP_UPDATE")
 
 HBD.RegisterCallback(pins, "PlayerZoneChanged", UpdateMinimap)
 
