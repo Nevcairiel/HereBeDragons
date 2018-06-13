@@ -5,7 +5,7 @@ if select(4, GetBuildInfo()) < 80000 then
 	return
 end
 
-local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 1
+local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 2
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -29,6 +29,9 @@ pins.worldmapProviderPin  = pins.worldmapProviderPin or CreateFromMixins(MapCanv
 
 -- store a reference to the active minimap object
 pins.Minimap = pins.Minimap or Minimap
+
+-- Data Constants
+local WORLD_MAP_ID = 947
 
 -- upvalue lua api
 local cos, sin, max = math.cos, math.sin, math.max
@@ -353,7 +356,7 @@ function worldmapProvider:HandlePin(icon, data)
     if not uiMapID then return end
 
     local x, y
-    if uiMapID == WORLDMAP_AZEROTH_ID then
+    if uiMapID == WORLD_MAP_ID then
         -- should this pin show on the world map?
         if uiMapID ~= data.uiMapID and data.worldMapShowFlag ~= HBD_PINS_WORLDMAP_SHOW_WORLD then return end
 
