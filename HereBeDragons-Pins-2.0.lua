@@ -316,6 +316,13 @@ worldmapPinsPool.creationFunc = function(framePool)
     frame:SetSize(1, 1)
     return Mixin(frame, worldmapProviderPin)
 end
+worldmapPinsPool.resetterFunc = function(pinPool, pin)
+    FramePool_HideAndClearAnchors(pinPool, pin)
+    pin:OnReleased()
+
+    pin.pinTemplate = nil
+    pin.owningMap = nil
+end
 
 -- register pin pool with the world map
 WorldMapFrame.pinPools["HereBeDragonsPinsTemplate"] = worldmapPinsPool
@@ -421,6 +428,16 @@ function worldmapProviderPin:OnAcquired(icon, x, y)
     icon:SetParent(self)
     icon:ClearAllPoints()
     icon:SetPoint("CENTER", self, "CENTER")
+    icon:Show()
+end
+
+function worldmapProviderPin:OnReleased()
+    if self.icon then
+        self.icon:Hide()
+        self.icon:SetParent(UIParent)
+        self.icon:ClearAllPoints()
+        self.icon = nil
+    end
 end
 
 -- register with the world map
