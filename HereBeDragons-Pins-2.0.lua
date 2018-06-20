@@ -5,7 +5,7 @@ if select(4, GetBuildInfo()) < 80000 then
 	return
 end
 
-local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 2
+local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 3
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -419,6 +419,7 @@ end
 --  map pin base API
 function worldmapProviderPin:OnLoad()
     self:UseFrameLevelType("PIN_FRAME_LEVEL_AREA_POI")
+    self:SetScalingLimits(1, 1.0, 1.2)
 end
 
 function worldmapProviderPin:OnAcquired(icon, x, y)
