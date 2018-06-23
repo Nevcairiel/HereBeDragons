@@ -5,7 +5,7 @@ if select(4, GetBuildInfo()) < 80000 then
 	return
 end
 
-local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 4
+local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 5
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -168,10 +168,25 @@ local function drawMinimapPin(pin, data)
     end
 end
 
+local function IsParentMap(originMapId, toCheckMapId)
+    local parentMapID = HBD.mapData[originMapId].parent
+    while parentMapID and HBD.mapData[parentMapID] do
+        local mapType = HBD.mapData[parentMapID].mapType
+        if mapType ~= Enum.UIMapType.Zone and mapType ~= Enum.UIMapType.Dungeon and mapType ~= Enum.UIMapType.Micro then
+            return false
+        end
+        if parentMapID == toCheckMapId then
+            return true
+        end
+        parentMapID = HBD.mapData[parentMapID].parent
+    end
+    return false
+end
+
 local function UpdateMinimapPins(force)
     -- get the current player position
     local x, y, instanceID = HBD:GetPlayerWorldPosition()
-    local mapID, mapFloor = HBD:GetPlayerZone()
+    local mapID = HBD:GetPlayerZone()
 
     -- get data from the API for calculations
     local zoom = pins.Minimap:GetZoom()
@@ -219,7 +234,7 @@ local function UpdateMinimapPins(force)
         end
 
         for pin, data in pairs(minimapPins) do
-            if data.instanceID == instanceID and (not data.floor or (data.floor == mapFloor and (data.floor == 0 or data.mapID == mapID))) then
+            if data.instanceID == instanceID and (not data.uiMapID or data.uiMapID == mapID or (data.showInParentZone and IsParentMap(data.uiMapID, mapID))) then
                 activeMinimapPins[pin] = data
                 data.keep = true
                 -- draw the pin (this may reset data.keep if outside of the map)
