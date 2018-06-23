@@ -5,7 +5,7 @@ if select(4, GetBuildInfo()) < 80000 then
 	return
 end
 
-local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 3
+local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 4
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -376,7 +376,7 @@ function worldmapProvider:HandlePin(icon, data)
         if uiMapID ~= data.uiMapID then
             local mapType = HBD.mapData[uiMapID].mapType
             if not data.uiMapID then
-                if mapType == Enum.UIMapType.Continent and data.worldMapShowFlag == HBD_PINS_WORLDMAP_SHOW_CONTINENT then
+                if mapType == Enum.UIMapType.Continent and data.worldMapShowFlag >= HBD_PINS_WORLDMAP_SHOW_CONTINENT then
                     --pass
                 elseif mapType ~= Enum.UIMapType.Zone and mapType ~= Enum.UIMapType.Dungeon and mapType ~= Enum.UIMapType.Micro then
                     -- fail
