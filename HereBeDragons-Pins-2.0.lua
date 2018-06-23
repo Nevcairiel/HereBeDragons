@@ -384,10 +384,10 @@ function worldmapProvider:HandlePin(icon, data)
                 end
             else
                 local show = false
-                local info = C_Map.GetMapInfo(data.uiMapID)
-                while info and info.parentMapID do
-                    if info.parentMapID == uiMapID then
-                        local mapType = HBD.mapData[info.parentMapID].mapType
+                local parentMapID = HBD.mapData[data.uiMapID].parent
+                while parentMapID and HBD.mapData[parentMapID] do
+                    if parentMapID == uiMapID then
+                        local mapType = HBD.mapData[parentMapID].mapType
                         -- show on any parent zones if they are normal zones
                         if data.worldMapShowFlag >= HBD_PINS_WORLDMAP_SHOW_PARENT and
                             (mapType == Enum.UIMapType.Zone or mapType == Enum.UIMapType.Dungeon or mapType == Enum.UIMapType.Micro) then
@@ -400,7 +400,7 @@ function worldmapProvider:HandlePin(icon, data)
                         break
                         -- worldmap is handled above already
                     else
-                        info = C_Map.GetMapInfo(info.parentMapID)
+                        parentMapID = HBD.mapData[parentMapID].parent
                     end
                 end
 
