@@ -162,7 +162,7 @@ if not oldversion or oldversion < 7 then
                             for k = 1, #groupMembers do
                                 local memberId = groupMembers[k].mapID
                                 if memberId and not mapData[memberId] then
-                                    processMap(memberId, C_Map.GetMapInfo(memberId), children[i].parentMapID)
+                                    processMap(memberId, C_Map.GetMapInfo(memberId), parent)
                                     processMapChildrenRecursive(memberId)
                                 end
                             end
