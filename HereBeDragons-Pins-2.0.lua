@@ -1,10 +1,5 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
--- HereBeDragons-Pins-2.0 is not supported on WoW 7.x
-if select(4, GetBuildInfo()) < 80000 then
-	return
-end
-
 local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 6
 assert(LibStub, MAJOR .. " requires LibStub")
 
