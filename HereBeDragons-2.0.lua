@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 7
+local MAJOR, MINOR = "HereBeDragons-2.0", 8
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -188,9 +188,20 @@ if not oldversion or oldversion < 7 then
     local function gatherMapData()
         processTransforms()
 
+        -- find all maps in well known structures
         processMapChildrenRecursive(COSMIC_MAP_ID)
 
         fixupZones()
+
+        -- try to fill in holes in the map list
+        for i = 1, 2000 do
+            if not mapData[i] then
+                local mapInfo = C_Map.GetMapInfo(i)
+                if mapInfo and mapInfo.name then
+                    processMap(i, mapInfo, nil)
+                end
+            end
+        end
     end
 
     gatherMapData()
