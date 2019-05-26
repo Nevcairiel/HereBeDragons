@@ -28,6 +28,7 @@ read_globals = {
     "C_Map",
     "C_Timer",
     "CreateFrame",
+    "GetBuildInfo",
     "GetCVar",
     "GetPlayerFacing",
     "IsLoggedIn",

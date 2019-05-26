@@ -15,6 +15,8 @@ HereBeDragons.worldMapData     = HereBeDragons.worldMapData or {}
 HereBeDragons.transforms       = HereBeDragons.transforms or {}
 HereBeDragons.callbacks        = HereBeDragons.callbacks or CBH:New(HereBeDragons, nil, nil, false)
 
+local WoWClassic = select(4, GetBuildInfo()) < 20000
+
 -- Data Constants
 local COSMIC_MAP_ID = 946
 local WORLD_MAP_ID = 947
@@ -168,10 +170,12 @@ if not oldversion or oldversion < 7 then
 
     local function fixupZones()
         local cosmic = C_Map.GetMapInfo(COSMIC_MAP_ID)
-        mapData[COSMIC_MAP_ID] = {0, 0, 0, 0}
-        mapData[COSMIC_MAP_ID].instance = -1
-        mapData[COSMIC_MAP_ID].name = cosmic.name
-        mapData[COSMIC_MAP_ID].mapType = cosmic.mapType
+        if cosmic then
+            mapData[COSMIC_MAP_ID] = {0, 0, 0, 0}
+            mapData[COSMIC_MAP_ID].instance = -1
+            mapData[COSMIC_MAP_ID].name = cosmic.name
+            mapData[COSMIC_MAP_ID].mapType = cosmic.mapType
+        end
 
         -- data for the azeroth world map
         worldMapData[0] = { 76153.14, 50748.62, 65008.24, 23827.51 }
@@ -187,7 +191,12 @@ if not oldversion or oldversion < 7 then
         processTransforms()
 
         -- find all maps in well known structures
-        processMapChildrenRecursive(COSMIC_MAP_ID)
+        if WoWClassic then
+            processMap(WORLD_MAP_ID)
+            processMapChildrenRecursive(WORLD_MAP_ID)
+        else
+            processMapChildrenRecursive(COSMIC_MAP_ID)
+        end
 
         fixupZones()
 
