@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 8
+local MAJOR, MINOR = "HereBeDragons-2.0", 9
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -178,13 +178,18 @@ if not oldversion or oldversion < 7 then
         end
 
         -- data for the azeroth world map
-        worldMapData[0] = { 76153.14, 50748.62, 65008.24, 23827.51 }
-        worldMapData[1] = { 77803.77, 51854.98, 13157.6, 28030.61 }
-        worldMapData[571] = { 71773.64, 50054.05, 36205.94, 12366.81 }
-        worldMapData[870] = { 67710.54, 45118.08, 33565.89, 38020.67 }
-        worldMapData[1220] = { 82758.64, 55151.28, 52943.46, 24484.72 }
-        worldMapData[1642] = { 77933.3, 51988.91, 44262.36, 32835.1 }
-        worldMapData[1643] = { 76060.47, 50696.96, 55384.8, 25774.35 }
+        if WoWClassic then
+            worldMapData[0] = { 44688.53, 29795.11, 32601.04, 9894.93 }
+            worldMapData[1] = { 44878.66, 29916.10, 8723.96, 14824.53 }
+        else
+            worldMapData[0] = { 76153.14, 50748.62, 65008.24, 23827.51 }
+            worldMapData[1] = { 77803.77, 51854.98, 13157.6, 28030.61 }
+            worldMapData[571] = { 71773.64, 50054.05, 36205.94, 12366.81 }
+            worldMapData[870] = { 67710.54, 45118.08, 33565.89, 38020.67 }
+            worldMapData[1220] = { 82758.64, 55151.28, 52943.46, 24484.72 }
+            worldMapData[1642] = { 77933.3, 51988.91, 44262.36, 32835.1 }
+            worldMapData[1643] = { 76060.47, 50696.96, 55384.8, 25774.35 }
+        end
     end
 
     local function gatherMapData()
