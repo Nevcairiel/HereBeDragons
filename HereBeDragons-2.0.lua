@@ -23,8 +23,6 @@ local WORLD_MAP_ID = 947
 local PI2 = math.pi * 2
 local atan2 = math.atan2
 local pairs, ipairs = pairs, ipairs
-local type = type
-local band = bit.band
 
 -- WoW API upvalues
 local UnitPosition = UnitPosition
@@ -98,13 +96,13 @@ if not oldversion or oldversion < 7 then
 
     local function applyMapTransforms(instanceID, left, right, top, bottom)
         if transforms[instanceID] then
-            for _, transformData in ipairs(transforms[instanceID]) do
-                if left <= transformData.maxX and right >= transformData.minX and top <= transformData.maxY and bottom >= transformData.minY then
-                    instanceID = transformData.newInstanceID
-                    left   = left   + transformData.offsetX
-                    right  = right  + transformData.offsetX
-                    top    = top    + transformData.offsetY
-                    bottom = bottom + transformData.offsetY
+            for _, data in ipairs(transforms[instanceID]) do
+                if left <= data.maxX and right >= data.minX and top <= data.maxY and bottom >= data.minY then
+                    instanceID = data.newInstanceID
+                    left   = left   + data.offsetX
+                    right  = right  + data.offsetX
+                    top    = top    + data.offsetY
+                    bottom = bottom + data.offsetY
                     break
                 end
             end
@@ -381,9 +379,6 @@ local function TranslateAzerothWorldMapCoordinates(self, x, y, oZone, dZone, all
     local instance = (oZone == WORLD_MAP_ID) and mapData[dZone].instance or mapData[oZone].instance
     if not worldMapData[instance] then return nil, nil end
 
-    local data = worldMapData[instance]
-    local width, height, left, top = data[1], data[2], data[3], data[4]
-
     if oZone == WORLD_MAP_ID then
         x, y = self:GetWorldCoordinatesFromAzerothWorldMap(x, y, instance)
         return self:GetZoneCoordinatesFromWorld(x, y, dZone, allowOutOfBounds)
@@ -437,11 +432,12 @@ end
 -- @param dY destination Y, in local zone/point coordinates
 -- @return distance, deltaX, deltaY in yards
 function HereBeDragons:GetZoneDistance(oZone, oX, oY, dZone, dX, dY)
-    local oX, oY, oInstance = self:GetWorldCoordinatesFromZone(oX, oY, oZone)
+    local oInstance, dInstance
+    oX, oY, oInstance = self:GetWorldCoordinatesFromZone(oX, oY, oZone)
     if not oX then return nil, nil, nil end
 
     -- translate dX, dY to the origin zone
-    local dX, dY, dInstance = self:GetWorldCoordinatesFromZone(dX, dY, dZone)
+    dX, dY, dInstance = self:GetWorldCoordinatesFromZone(dX, dY, dZone)
     if not dX then return nil, nil, nil end
 
     if oInstance ~= dInstance then return nil, nil, nil end
@@ -481,7 +477,7 @@ end
 -- @return x, y, instanceID
 function HereBeDragons:GetUnitWorldPosition(unitId)
     -- get the current position
-    local y, x, z, instanceID = UnitPosition(unitId)
+    local y, x, _z, instanceID = UnitPosition(unitId)
     if not x or not y then return nil, nil, instanceIDOverrides[instanceID] or instanceID end
 
     -- return transformed coordinates
@@ -493,7 +489,7 @@ end
 -- @return x, y, instanceID
 function HereBeDragons:GetPlayerWorldPosition()
     -- get the current position
-    local y, x, z, instanceID = UnitPosition("player")
+    local y, x, _z, instanceID = UnitPosition("player")
     if not x or not y then return nil, nil, instanceIDOverrides[instanceID] or instanceID end
 
     -- return transformed coordinates
@@ -513,7 +509,7 @@ end
 -- @return x, y, uiMapID, mapType
 function HereBeDragons:GetPlayerZonePosition(allowOutOfBounds)
     if not currentPlayerUIMapID then return nil, nil, nil, nil end
-    local x, y, instanceID = self:GetPlayerWorldPosition()
+    local x, y, _instanceID = self:GetPlayerWorldPosition()
     if not x or not y then return nil, nil, nil, nil end
 
     x, y = self:GetZoneCoordinatesFromWorld(x, y, currentPlayerUIMapID, allowOutOfBounds)
