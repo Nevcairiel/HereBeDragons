@@ -1,6 +1,6 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
-local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 6
+local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 7
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, _oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -650,6 +650,9 @@ function pins:AddWorldMapIconWorld(ref, icon, instanceID, x, y, showFlag, frameL
     if type(instanceID) ~= "number" or type(x) ~= "number" or type(y) ~= "number" then
         error(MAJOR..": AddWorldMapIconWorld: 'instanceID', 'x' and 'y' must be numbers", 2)
     end
+    if showFlag ~= nil and type(showFlag) ~= "number" then
+        error(MAJOR..": AddWorldMapIconWorld: 'showFlag' must be a number (or nil)", 2)
+    end
 
     if not worldmapPinRegistry[ref] then
         worldmapPinRegistry[ref] = {}
@@ -687,6 +690,9 @@ function pins:AddWorldMapIconMap(ref, icon, uiMapID, x, y, showFlag, frameLevel)
     end
     if type(uiMapID) ~= "number" or type(x) ~= "number" or type(y) ~= "number" then
         error(MAJOR..": AddWorldMapIconMap: 'uiMapID', 'x' and 'y' must be numbers")
+    end
+    if showFlag ~= nil and type(showFlag) ~= "number" then
+        error(MAJOR..": AddWorldMapIconMap: 'showFlag' must be a number (or nil)", 2)
     end
 
     -- convert to world coordinates
