@@ -61,6 +61,7 @@ local instanceIDOverrides = {
     [1498] = 1220, -- Havoc Demon Hunter Artifact Scenario (Suramar)
     [1502] = 1220, -- Dalaran Underbelly
     [1533] = 0,    -- Karazhan Artifact Scenario
+    [1539] = 0,    -- Arm Warrior Artifact Tirisfal Scenario
     [1612] = 1220, -- Feral Druid Artifact Scenario (Suramar)
     [1626] = 1220, -- Suramar Withered Scenario
     [1662] = 1220, -- Suramar Invasion Scenario
