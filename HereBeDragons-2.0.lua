@@ -65,6 +65,8 @@ local instanceIDOverrides = {
     [1612] = 1220, -- Feral Druid Artifact Scenario (Suramar)
     [1626] = 1220, -- Suramar Withered Scenario
     [1662] = 1220, -- Suramar Invasion Scenario
+    -- BfA
+    [2241] = 1,    -- Uldum N'zoth invasion
 }
 
 local dynamicInstanceIDOverrides = {}
