@@ -66,7 +66,9 @@ local instanceIDOverrides = {
     [1626] = 1220, -- Suramar Withered Scenario
     [1662] = 1220, -- Suramar Invasion Scenario
     -- BfA
+    [2213] = 0,    -- Horrific Vision of Stormwind
     [2241] = 1,    -- Uldum N'zoth assault
+    [2274] = 1,    -- Uldum N'zoth Minor Vision
     [2275] = 870,  -- Vale of Eternal Blossoms N'zoth Minor Vision
 }
 
