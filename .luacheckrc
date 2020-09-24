@@ -26,6 +26,7 @@ read_globals = {
 
     -- API functions
     "C_Map",
+    "C_Minimap",
     "C_Timer",
     "CreateFrame",
     "GetBuildInfo",
