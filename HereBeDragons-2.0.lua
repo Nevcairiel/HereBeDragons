@@ -321,11 +321,6 @@ HereBeDragons.eventFrame:RegisterEvent("ZONE_CHANGED_INDOORS")
 HereBeDragons.eventFrame:RegisterEvent("NEW_WMO_CHUNK")
 HereBeDragons.eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
--- if we're loading after entering the world (ie. on demand), update position now
-if IsLoggedIn() then
-    UpdateCurrentPosition(true)
-end
-
 --- Return the localized zone name for a given uiMapID
 -- @param uiMapID uiMapID of the zone
 function HereBeDragons:GetLocalizedMap(uiMapID)
@@ -566,4 +561,10 @@ function HereBeDragons:GetPlayerZonePosition(allowOutOfBounds)
         return x, y, currentPlayerUIMapID, currentPlayerUIMapType
     end
     return nil, nil, nil, nil
+end
+
+-- if we're loading after entering the world (ie. on demand), update position now
+-- This needs to remain at the bottom of the library to ensure all functions are loaded before they are needed
+if IsLoggedIn() then
+    UpdateCurrentPosition(true)
 end
