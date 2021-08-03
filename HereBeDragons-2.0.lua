@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 16
+local MAJOR, MINOR = "HereBeDragons-2.0", 17
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -82,7 +82,7 @@ local function overrideInstance(instance) return instanceIDOverrides[instance] o
 HereBeDragons.___DIIDO = dynamicInstanceIDOverrides
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion or oldversion < 16 then
+if not oldversion or oldversion < 17 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
@@ -234,7 +234,7 @@ if not oldversion or oldversion < 16 then
         fixupZones()
 
         -- try to fill in holes in the map list
-        for i = 1, 2000 do
+        for i = 1, 2500 do
             if not mapData[i] then
                 local mapInfo = C_Map.GetMapInfo(i)
                 if mapInfo and mapInfo.name then
