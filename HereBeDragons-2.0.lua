@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 17
+local MAJOR, MINOR = "HereBeDragons-2.0", 18
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -80,6 +80,9 @@ local dynamicInstanceIDOverrides = {}
 instanceIDOverrides = setmetatable(instanceIDOverrides, { __index = dynamicInstanceIDOverrides })
 
 local function overrideInstance(instance) return instanceIDOverrides[instance] or instance end
+
+-- for use in HBD-Pins
+HereBeDragons.overrideInstance = overrideInstance
 
 -- debug only
 HereBeDragons.___DIIDO = dynamicInstanceIDOverrides
