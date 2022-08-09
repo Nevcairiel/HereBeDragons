@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 19
+local MAJOR, MINOR = "HereBeDragons-2.0", 20
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -41,8 +41,6 @@ local currentPlayerUIMapID, currentPlayerUIMapType
 
 -- Override instance ids for phased content
 local instanceIDOverrides = {
-    -- DK starting zone
-    [609] = 0,
     -- Draenor
     [1152] = 1116, -- Horde Garrison 1
     [1330] = 1116, -- Horde Garrison 2
@@ -81,9 +79,6 @@ instanceIDOverrides = setmetatable(instanceIDOverrides, { __index = dynamicInsta
 
 local function overrideInstance(instance) return instanceIDOverrides[instance] or instance end
 
--- for use in HBD-Pins
-HereBeDragons.overrideInstance = overrideInstance
-
 -- debug only
 HereBeDragons.___DIIDO = dynamicInstanceIDOverrides
 
@@ -108,6 +103,7 @@ if not oldversion or oldversion < 17 then
         transformData = {
             { 530, 0, 4800, 16000, -10133.3, -2666.67, -2400, 2662.8 },
             { 530, 1, -6933.33, 533.33, -16000, -8000, 10339.7, 17600 },
+            { 609, 0, -10000, 10000, -10000, 10000, 0, 0 },
         }
     else
         transformData = {

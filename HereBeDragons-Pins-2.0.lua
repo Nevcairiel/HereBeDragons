@@ -1,6 +1,6 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
-local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 9
+local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 10
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, _oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -393,7 +393,7 @@ function worldmapProvider:HandlePin(icon, data)
         x, y = HBD:GetAzerothWorldMapCoordinatesFromWorld(data.x, data.y, data.instanceID)
     else
         -- check that it matches the instance
-        if not HBD.mapData[uiMapID] or HBD.overrideInstance(HBD.mapData[uiMapID].instance) ~= data.instanceID then return end
+        if not HBD.mapData[uiMapID] or HBD.mapData[uiMapID].instance ~= data.instanceID then return end
 
         if uiMapID ~= data.uiMapID then
             local mapType = HBD.mapData[uiMapID].mapType
