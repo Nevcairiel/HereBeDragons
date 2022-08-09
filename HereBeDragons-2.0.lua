@@ -16,7 +16,8 @@ HereBeDragons.transforms       = HereBeDragons.transforms or {}
 HereBeDragons.callbacks        = HereBeDragons.callbacks or CBH:New(HereBeDragons, nil, nil, false)
 
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
+local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC) and GetExpansionLevel() < LE_EXPANSION_NORTHREND
+local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC) and GetExpansionLevel() >= LE_EXPANSION_NORTHREND
 
 -- Data Constants
 local COSMIC_MAP_ID = 946
@@ -40,6 +41,8 @@ local currentPlayerUIMapID, currentPlayerUIMapType
 
 -- Override instance ids for phased content
 local instanceIDOverrides = {
+    -- DK starting zone
+    [609] = 0,
     -- Draenor
     [1152] = 1116, -- Horde Garrison 1
     [1330] = 1116, -- Horde Garrison 2
@@ -94,6 +97,11 @@ if not oldversion or oldversion < 17 then
     -- format: instanceID, newInstanceID, minY, maxY, minX, maxX, offsetY, offsetX
     local transformData
     if WoWBC then
+        transformData = {
+            { 530, 0, 4800, 16000, -10133.3, -2666.67, -2400, 2662.8 },
+            { 530, 1, -6933.33, 533.33, -16000, -8000, 10339.7, 17600 },
+        }
+    elseif WoWWrath then
         transformData = {
             { 530, 0, 4800, 16000, -10133.3, -2666.67, -2400, 2662.8 },
             { 530, 1, -6933.33, 533.33, -16000, -8000, 10339.7, 17600 },
@@ -209,6 +217,10 @@ if not oldversion or oldversion < 17 then
         elseif WoWBC then
             worldMapData[0] = { 44688.53, 29791.24, 32681.47, 11479.44 }
             worldMapData[1] = { 44878.66, 29916.10,  8723.96, 14824.53 }
+        elseif WoWWrath then
+            worldMapData[0] = { 48033.24, 32020.8, 36867.97, 14848.84 }
+            worldMapData[1] = { 47908.72, 31935.28, 8552.61, 18467.83 }
+            worldMapData[571] = { 47662.7, 31772.19, 25198.53, 11072.07 }
         else
             worldMapData[0] = { 76153.14, 50748.62, 65008.24, 23827.51 }
             worldMapData[1] = { 77803.77, 51854.98, 13157.6, 28030.61 }
