@@ -15,9 +15,10 @@ HereBeDragons.worldMapData     = HereBeDragons.worldMapData or {}
 HereBeDragons.transforms       = HereBeDragons.transforms or {}
 HereBeDragons.callbacks        = HereBeDragons.callbacks or CBH:New(HereBeDragons, nil, nil, false)
 
+local WOW_INTERFACE_VER = select(4, GetBuildInfo())
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
-local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC) and select(4, GetBuildInfo()) < 30000
-local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC) and select(4, GetBuildInfo()) >= 30400
+local WoWBC = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 20500 and WOW_INTERFACE_VER < 30000
+local WoWWrath = (WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE) and WOW_INTERFACE_VER >= 30400 and WOW_INTERFACE_VER < 40000
 
 -- Data Constants
 local COSMIC_MAP_ID = 946
@@ -94,7 +95,9 @@ if not oldversion or oldversion < 17 then
     -- map transform data extracted from UIMapAssignment.db2 (see HereBeDragons-Scripts on GitHub)
     -- format: instanceID, newInstanceID, minY, maxY, minX, maxX, offsetY, offsetX
     local transformData
-    if WoWBC then
+    if WoWClassic then
+        transformData = {}
+    elseif WoWBC then
         transformData = {
             { 530, 0, 4800, 16000, -10133.3, -2666.67, -2400, 2662.8 },
             { 530, 1, -6933.33, 533.33, -16000, -8000, 10339.7, 17600 },
