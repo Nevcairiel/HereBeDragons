@@ -37,9 +37,10 @@ read_globals = {
 
     -- FrameXML functions
     "CreateFramePool",
+    "CreateSecureFramePool",
+    "CreateUnsecuredTexturePool",
     "CreateFromMixins",
     "CreateVector2D",
-    "FramePool_HideAndClearAnchors",
     "Mixin",
 
     -- FrameXML Frames
