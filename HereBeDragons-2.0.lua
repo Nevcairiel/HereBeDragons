@@ -158,7 +158,12 @@ if not oldversion or oldversion < 23 then
     local vector00, vector05 = CreateVector2D(0, 0), CreateVector2D(0.5, 0.5)
     -- gather the data of one map (by uiMapID)
     local function processMap(id, data, parent)
-        if not id or not data or mapData[id] then return end
+        if not id or mapData[id] then return end
+
+        if not data then
+            data = C_Map.GetMapInfo(id)
+            if not data then return end
+        end
 
         if data.parentMapID and data.parentMapID ~= 0 then
             parent = data.parentMapID
@@ -200,7 +205,7 @@ if not oldversion or oldversion < 23 then
                             for k = 1, #groupMembers do
                                 local memberId = groupMembers[k].mapID
                                 if memberId and not mapData[memberId] then
-                                    processMap(memberId, C_Map.GetMapInfo(memberId), parent)
+                                    processMap(memberId, nil, parent)
                                     processMapChildrenRecursive(memberId)
                                 end
                             end
