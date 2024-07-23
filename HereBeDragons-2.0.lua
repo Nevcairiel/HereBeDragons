@@ -155,7 +155,7 @@ if not oldversion or oldversion < 23 then
         return instanceID, left, right, top, bottom
     end
 
-    local vector00, vector05 = CreateVector2D(0, 0), CreateVector2D(0.5, 0.5)
+    local vector025, vector075 = CreateVector2D(0.25, 0.25), CreateVector2D(0.75, 0.75)
     -- gather the data of one map (by uiMapID)
     local function processMap(id, data, parent)
         if not id or mapData[id] then return end
@@ -171,14 +171,18 @@ if not oldversion or oldversion < 23 then
             parent = 0
         end
 
-        -- get two positions from the map, we use 0/0 and 0.5/0.5 to avoid issues on some maps where 1/1 is translated inaccurately
-        local instance, topLeft = C_Map.GetWorldPosFromMapPos(id, vector00)
-        local _, bottomRight = C_Map.GetWorldPosFromMapPos(id, vector05)
+        -- get two positions from the map, we use the center 0.5 square to avoid issues on some maps where 1/1 is translated inaccurately
+        local instance, topLeft = C_Map.GetWorldPosFromMapPos(id, vector025)
+        local _, bottomRight = C_Map.GetWorldPosFromMapPos(id, vector075)
         if topLeft and bottomRight then
             local top, left = topLeft:GetXY()
             local bottom, right = bottomRight:GetXY()
-            bottom = top + (bottom - top) * 2
-            right = left + (right - left) * 2
+            local height = (bottom - top) * 2
+            local width = (right - left) * 2
+            top = top - height / 4
+            bottom = top + height
+            left = left - width / 4
+            right = left + width
 
             instance, left, right, top, bottom = applyMapTransforms(instance, left, right, top, bottom)
             mapData[id] = {left - right, top - bottom, left, top, instance = instance, name = data.name, mapType = data.mapType, parent = parent }
