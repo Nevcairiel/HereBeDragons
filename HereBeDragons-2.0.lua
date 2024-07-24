@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 24
+local MAJOR, MINOR = "HereBeDragons-2.0", 25
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -19,7 +19,7 @@ local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
 local WoWCata = (WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC)
-local WoW11 = select(4, GetBuildInfo()) >= 110000
+local TWW = select(4, GetBuildInfo()) >= 110002
 
 -- Data Constants
 local COSMIC_MAP_ID = 946
@@ -84,7 +84,7 @@ local function overrideInstance(instance) return instanceIDOverrides[instance] o
 HereBeDragons.___DIIDO = dynamicInstanceIDOverrides
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion or oldversion < 23 then
+if not oldversion or oldversion < 25 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
@@ -244,7 +244,7 @@ if not oldversion or oldversion < 23 then
             worldMapData[0] = { 48033.24, 32020.8, 36867.97, 14848.84 }
             worldMapData[1] = { 47908.72, 31935.28, 8552.61, 18467.83 }
             worldMapData[571] = { 47662.7, 31772.19, 25198.53, 11072.07 }
-        elseif WoW11 then
+        elseif TWW then
             worldMapData[0] = { 76153.14, 50748.62, 65008.24, 23827.51 }
             worldMapData[1] = { 77621.12, 51854.98, 12444.4, 28030.61 }
             worldMapData[571] = { 71773.64, 50054.05, 36205.94, 12366.81 }
