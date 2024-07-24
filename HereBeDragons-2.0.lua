@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 26
+local MAJOR, MINOR = "HereBeDragons-2.0", 27
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -84,7 +84,7 @@ local function overrideInstance(instance) return instanceIDOverrides[instance] o
 HereBeDragons.___DIIDO = dynamicInstanceIDOverrides
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion or oldversion < 26 then
+if not oldversion or oldversion < 27 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
@@ -155,7 +155,7 @@ if not oldversion or oldversion < 26 then
         return instanceID, left, right, top, bottom
     end
 
-    local vector05 = CreateVector2D(0.5, 0.5)
+    local vector00, vector05 = CreateVector2D(0, 0), CreateVector2D(0.5, 0.5)
     -- gather the data of one map (by uiMapID)
     local function processMap(id, data, parent)
         if not id or mapData[id] then return end
@@ -173,7 +173,19 @@ if not oldversion or oldversion < 26 then
 
         -- get two positions from the map, we use 0/0 and 0.5/0.5 to avoid issues on some maps where 1/1 is translated inaccurately
         local instance, center = C_Map.GetWorldPosFromMapPos(id, vector05)
-        local width, height = C_Map.GetMapWorldSize(id)
+        local width, height
+        if C_Map.GetMapWorldSize then
+            width, height = C_Map.GetMapWorldSize(id)
+        else
+            -- compat for classic... why does that not have GetMapWorldSize?
+            local _, topleft = C_Map.GetWorldPosFromMapPos(id, vector00)
+            if center and topleft then
+                local top, left = topleft:GetXY()
+                local bottom, right = center:GetXY()
+                width = (left - right) * 2
+                height = (top - bottom) * 2
+            end
+        end
         if center and width and height then
            local top, left = center:GetXY()
            top = top + (height / 2)
