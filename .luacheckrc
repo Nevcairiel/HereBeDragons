@@ -40,6 +40,7 @@ read_globals = {
     "CreateUnsecuredRegionPoolInstance",
     "CreateFromMixins",
     "CreateVector2D",
+    "Lerp",
     "Mixin",
 
     -- FrameXML Frames
