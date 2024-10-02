@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 28
+local MAJOR, MINOR = "HereBeDragons-2.0", 29
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -375,6 +375,9 @@ end
 
 local function OnEvent(frame, event, ...)
     UpdateCurrentPosition(true)
+
+    -- try to work around missing zone changes where the event fires before the zone updates
+    StartUpdateTimer()
 end
 
 HereBeDragons.eventFrame:SetScript("OnEvent", OnEvent)
