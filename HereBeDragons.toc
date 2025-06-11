@@ -1,4 +1,4 @@
-## Interface: 11506,40402,110100,110105
+## Interface: 11507,40402,50500,110105,110107
 ## Title: Lib: HereBeDragons
 ## Notes: HereBeDragons is a data API for the World of Warcraft mapping system
 ## Author: Nevcairiel
