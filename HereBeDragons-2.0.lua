@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 29
+local MAJOR, MINOR = "HereBeDragons-2.0", 30
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -19,6 +19,7 @@ local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
 local WoWCata = (WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC)
+local WoWMists = (WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC)
 
 -- Data Constants
 local COSMIC_MAP_ID = 946
@@ -91,7 +92,7 @@ local function overrideInstance(instance) return instanceIDOverrides[instance] o
 HereBeDragons.___DIIDO = dynamicInstanceIDOverrides
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion or oldversion < 27 then
+if not oldversion or oldversion < 30 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
@@ -119,6 +120,13 @@ if not oldversion or oldversion < 27 then
         transformData = {
             { 530, 0, 4800, 16000, -10133.3, -2666.67, -2400, 2662.8 },
             { 530, 1, -6933.33, 533.33, -16000, -8000, 10339.7, 17600 },
+        }
+    elseif WoWMists then
+        transformData = {
+            { 530, 1, -6933.33, 533.33, -16000, -8000, 10339.7, 17600 },
+            { 530, 0, 4800, 16000, -10133.3, -2666.67, -2400, 2662.8 },
+            { 1014, 870, 3200, 5333.3, 1066.7, 2666.7, 0, 0 },
+            { 1064, 870, 5391, 8148, 3518, 7655, -2134.2, -2286.6 },
         }
     else
         transformData = {
@@ -260,6 +268,11 @@ if not oldversion or oldversion < 27 then
             worldMapData[0] = { 48033.24, 32020.8, 36867.97, 14848.84 }
             worldMapData[1] = { 47908.72, 31935.28, 8552.61, 18467.83 }
             worldMapData[571] = { 47662.7, 31772.19, 25198.53, 11072.07 }
+        elseif WoWMists then
+            worldMapData[0] = { 57114.85, 38082.53, 46284.08, 15795.1 }
+            worldMapData[1] = { 58984.3, 39319.22, 10153.84, 19536.12 }
+            worldMapData[571] = { 56338.03, 37567.89, 29892.96, 11496.56 }
+            worldMapData[870] = { 53103.22, 35408.03, 28648.8, 30726.23 }
         else
             worldMapData[0] = { 76153.14, 50748.62, 65008.24, 23827.51 }
             worldMapData[1] = { 77621.12, 51854.98, 12444.4, 28030.61 }
