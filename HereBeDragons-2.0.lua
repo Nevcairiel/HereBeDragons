@@ -77,14 +77,6 @@ local instanceIDOverrides = {
     [2275] = 870,  -- Vale of Eternal Blossoms N'zoth Minor Vision
 }
 
--- override map translations where a zone shares a continent map, but not the continent instance
--- these values are obtained from C_Map.GetMapRectOnMap(zone, continent)
-local zoneTranslateOverrides = {
-    [2248] = {
-        [2274] = { 0.5, 0.948, 0.01, 0.456 }, -- Isle of Dorn to Khaz Algar
-    }
-}
-
 local dynamicInstanceIDOverrides = {}
 instanceIDOverrides = setmetatable(instanceIDOverrides, { __index = dynamicInstanceIDOverrides })
 
@@ -566,17 +558,11 @@ function HereBeDragons:TranslateZoneCoordinates(x, y, oZone, dZone, allowOutOfBo
         return TranslateAzerothWorldMapCoordinates(self, x, y, oZone, dZone, allowOutOfBounds)
     end
 
-    -- override translation for special cases that share a map but not an instance
-    -- these cases should typically just translate from a zone to their continent map
-    if zoneTranslateOverrides[oZone] and zoneTranslateOverrides[oZone][dZone] then
-        return Lerp(zoneTranslateOverrides[oZone][dZone][1], zoneTranslateOverrides[oZone][dZone][2], x), Lerp(zoneTranslateOverrides[oZone][dZone][3], zoneTranslateOverrides[oZone][dZone][4], y)
-    end
-
     local data = mapData[dZone]
     local data_origin = mapData[oZone]
     if not data or not data_origin then return nil, nil end
 
-    -- todo: short circuit some translation here
+    -- todo: short circuit some translation here for instanceZones
 
     local xCoord, yCoord, instance = self:GetWorldCoordinatesFromZone(x, y, oZone)
     if not xCoord then return nil, nil end
