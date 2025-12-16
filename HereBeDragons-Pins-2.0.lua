@@ -503,6 +503,11 @@ end
 local last_update = 0
 local function OnUpdateHandler(frame, elapsed)
     last_update = last_update + elapsed
+
+    -- skip updates while the minimap is hidden
+    if pins.Minimap and not pins.Minimap:IsVisible() then return end
+
+    -- check for a full update every second, so pins coming in range get properly rendered
     if last_update > 1 or queueFullUpdate then
         UpdateMinimapPins(queueFullUpdate)
         last_update = 0
