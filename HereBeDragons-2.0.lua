@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 32
+local MAJOR, MINOR = "HereBeDragons-2.0", 33
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -481,7 +481,7 @@ function HereBeDragons:GetZoneCoordinatesFromWorldInstance(x, y, instance, zone,
     if not data or data[1] == 0 or data[2] == 0 then return nil, nil end
     if not x or not y then return nil, nil end
 
-    local targetInstance = overrideInstance(data.instance)
+    local targetInstance = data.instance
     if targetInstance ~= instance then
         if instanceZones[instance] and instanceZones[instance][targetInstance] then
             x, y, instance = TranslateInstanceZone(self, instanceZones[instance][targetInstance], x, y)
