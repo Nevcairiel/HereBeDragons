@@ -372,7 +372,14 @@ function StartUpdateTimer()
 end
 
 local function OnEvent(frame, event, ...)
-    UpdateCurrentPosition(true)
+    local instanceCheck = false
+    if event == "ZONE_CHANGED_NEW_AREA" then
+        instanceCheck = true
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        local initial, reload = ...
+        instanceCheck = (initial or reload)
+    end
+    UpdateCurrentPosition(instanceCheck)
 
     -- try to work around missing zone changes where the event fires before the zone updates
     StartUpdateTimer()
