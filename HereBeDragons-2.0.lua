@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 34
+local MAJOR, MINOR = "HereBeDragons-2.0", 35
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -87,7 +87,7 @@ local function overrideInstance(instance) return instanceIDOverrides[instance] o
 HereBeDragons.___DIIDO = dynamicInstanceIDOverrides
 
 -- gather map info, but only if this isn't an upgrade (or the upgrade version forces a re-map)
-if not oldversion or oldversion < 32 then
+if not oldversion or oldversion < 35 then
     -- wipe old data, if required, otherwise the upgrade path isn't triggered
     if oldversion then
         wipe(mapData)
@@ -250,7 +250,10 @@ if not oldversion or oldversion < 32 then
         end
 
         -- data for the azeroth world map
-        if WoWClassic then
+        if WoWForever then
+            worldMapData[0] = { 44688.53, 29795.12, 32601.03,  9894.93 }
+            worldMapData[1] = { 44878.66, 29916.1,   8723.96, 14824.53 }
+        elseif WoWClassic then
             worldMapData[0] = { 44688.53, 29795.11, 32601.04,  9894.93 }
             worldMapData[1] = { 44878.66, 29916.10,  8723.96, 14824.53 }
         elseif WoWBC then
@@ -287,7 +290,7 @@ if not oldversion or oldversion < 32 then
         processTransforms()
 
         -- find all maps in well known structures
-        if WoWClassic then
+        if WoWClassic or WoWForever then
             processMap(WORLD_MAP_ID)
             processMapChildrenRecursive(WORLD_MAP_ID)
         else
