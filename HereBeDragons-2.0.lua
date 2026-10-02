@@ -1,6 +1,6 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
-local MAJOR, MINOR = "HereBeDragons-2.0", 33
+local MAJOR, MINOR = "HereBeDragons-2.0", 34
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local HereBeDragons, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -16,6 +16,7 @@ HereBeDragons.transforms       = HereBeDragons.transforms or {}
 HereBeDragons.instanceZones    = HereBeDragons.instanceZones or {}
 HereBeDragons.callbacks        = HereBeDragons.callbacks or CBH:New(HereBeDragons, nil, nil, false)
 
+local WoWForever = (WOW_PROJECT_ID == WOW_PROJECT_CAMELOT)
 local WoWClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 local WoWBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
 local WoWWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
@@ -98,7 +99,7 @@ if not oldversion or oldversion < 32 then
     -- map transform data extracted from UIMapAssignment.db2 (see HereBeDragons-Scripts on GitHub)
     -- format: instanceID, newInstanceID, minY, maxY, minX, maxX, offsetY, offsetX
     local transformData
-    if WoWClassic then
+    if WoWClassic or WoWForever then
         transformData = {}
     elseif WoWBC or WoWWrath or WoWCata then
         transformData = {
