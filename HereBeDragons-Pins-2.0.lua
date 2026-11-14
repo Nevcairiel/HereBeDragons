@@ -1,6 +1,6 @@
 -- HereBeDragons-Pins is a library to show pins/icons on the world map and minimap
 
-local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 17
+local MAJOR, MINOR = "HereBeDragons-Pins-2.0", 18
 assert(LibStub, MAJOR .. " requires LibStub")
 
 local pins, oldversion = LibStub:NewLibrary(MAJOR, MINOR)
@@ -171,7 +171,9 @@ local function drawMinimapPin(pin, data)
     if dist <= 1 or data.floatOnEdge then
         pin:Show()
         pin:ClearAllPoints()
-        pin:SetPoint("CENTER", pins.Minimap, "CENTER", diffX * minimapWidth, -diffY * minimapHeight)
+        -- SetPoint offsets use the pin's scale, not the minimap's coordinate units.
+        local scale = 1 / pin:GetScale()
+        pin:SetPoint("CENTER", pins.Minimap, "CENTER", diffX * minimapWidth * scale, -diffY * minimapHeight * scale)
         data.onEdge = (dist > 1)
     else
         pin:Hide()
